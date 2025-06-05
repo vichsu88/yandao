@@ -60,3 +60,26 @@
 <div class="faq-search">
   <input type="search" id="searchInput" placeholder="搜尋問題" />
 </div>
+CSS：
+.faq-search{position:absolute;left:20px;top:143px;width:350px;height:33px;}
+#searchInput{
+  width:100%;height:100%;
+  background:#FFF5E1 url("public/FAQphoto/searchIcon.png") 10px center no-repeat;
+  background-size:16px 16px;
+  border:1px solid #8A1C1C;border-radius:6px;
+  padding-left:36px;font-size:14px;color:#8A1C1C;
+}
+#searchInput::placeholder{color:#B6B6B6;}
+#6 搜尋功能 (先用假資料)
+檔案：/main.js
+假 FAQ 資料：
+
+js
+const faqs=[
+  {q:"請問收驚要準備什麼？",a:"...",tags:["收驚","準備","供品"]},
+  {q:"手工香可以宅配嗎？",a:"...",tags:["手工香","宅配"]},
+  ...
+];
+監聽 #searchInput 的 input 事件，依關鍵字模糊比對 tags，動態渲染符合條目。
+
+無關鍵字時顯示全部 FAQ。
