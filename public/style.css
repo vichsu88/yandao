@@ -59,15 +59,9 @@ body{
 /* 合成 logo */
 .banner-logo{
   position:absolute;
-  left:50%;
-  bottom:0;                 /* 與 header 底線對齊 */
-  transform:translateX(-50%);
-  width:156px;
-  max-width:40%;
-  height:auto;
-  object-fit:contain;
-  pointer-events:none;
-  z-index:100;
+  top:44px; left:50%; transform:translateX(-50%);
+  width:200px;            /* 或 max-width:40% 取較小值 */
+  height:auto; z-index:100;
 }
 
 /* 標題 */
