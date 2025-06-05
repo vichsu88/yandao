@@ -1,124 +1,57 @@
-===============================================
+=========================================================
+🔥 FAQ 畫面微調任務 v11 ─ 版面層級 & QA 間距   2025-06-XX
+=========================================================
 
-📱 版型：iPhone 14 (390×844)   左右邊距固定 20 px  
-🎨 主題色：  
-  – --bg        #FDF8F2  
-  – --faq-bg    #FFF5E1  
-  – --faq-border #D9B88A  
-  – --primary   #8A1C1C  
+🎯 目標：讓「常見問題」標題與搜尋框完整露出；QA 卡片與分類按鈕之間留 12 px
+📱 版型：iPhone 14 (390 × 844)   |   橘色頂端區域固定 104 px（44 + 60）
 
----------------------------------------------------
-#1 修正「常見問題」標題 (.page-title) 不顯示
----------------------------------------------------
-檔案：public/style.css
+---------------------------------------------------------
+#1 重新推開主內容 (margin-top 調整)
+---------------------------------------------------------
+檔案：**public/style.css**
 
-1. 目前 `.page-title` 被 banner-fixed 上層覆蓋，需要調整 z-index 與 margin-top，確保它露出並置於橘色區下方：
-   ```css
-   /* 修改前（可能看不到） */
-   .page-title {
-     /* margin:24px auto 0; */
-     /* background: var(--bg); */
-     /* z-index: 10; */
-   }
-→ 請改為：
-
-css
-複製
-編輯
-.page-title {
-  position: relative;                 /* 使 z-index 生效 */
-  margin: 24px auto 0;                /* 下移 24px，自動置中 */
-  background: var(--bg);              /* 背景維持白色 */
-  z-index: 500;                       /* 確保在 banner-fixed 之下，但比搜尋框高 */
-  padding-bottom: 4px;                /* 與設計圖一致 */
-  width: fit-content;
-  font-weight: 600;
-  font-size: 1.05rem;
-  color: #000;
-  border-bottom: 2.5px solid var(--faq-border);
-}
-因 banner-fixed 高度共 104px，已使用全域 margin-top 推開主內容，但 .page-title 仍可能被橘色區部分遮蔽，請在 CSS 最上方確認已加：
-
-css
-複製
-編輯
-/* ▉ 推開主內容：避免被 banner-fixed 遮住 */
+```css
+/* ▉ 推開主內容：避免被橘色 Banner 遮住 */
 main,
 .category-bar,
 .page-title,
 .faq-search,
 .faq-list {
-  margin-top: 104px;   /* 44px (banner 上半) + 60px (logo 區) = 104px */
+    margin-top: 112px;     /* ⚠️ 104 → 112  (多留 8px 讓標題不貼邊) */
 }
-若已存在上述規則但 .page-title 依舊不顯示，請特別檢查有沒有被其他規則 override；可再補上：
+說明：原 104 px 仍略被 Logo 壓到；改 112 px 可確保標題與搜尋框完全跑出橘色區域。
 
+#2 分類按鈕下方保留間距
 css
 複製
 編輯
-.page-title {
-  display: block !important;
+/* ▉ 分類按鈕列 */
+.category-bar{
+    margin: 0 20px;
+    padding: 0.7rem 0;
+    display: flex;
+    gap: .6rem;
+    justify-content: space-between;
+    margin-bottom: 12px;   /* ★ 新增：分類列底與 QA 卡片間距 12px */
 }
-瀏覽器 DevTools → Elements 中確認 <h2 class="page-title">常見問題</h2> 是否真的出現在 <body> 內，若找不到，再檢查 HTML 檔首尾標籤是否對齊，確保 <body> 裡 <h2> 沒有誤移到 .banner-fixed 之外。
-
-#2 修正「搜尋框」(.faq-search / #searchInput) 不顯示
-檔案：public/style.css
-
-檢查 HTML 已經包含：
-
-html
-複製
-編輯
-<h2 class="page-title">常見問題</h2>
-<div class="faq-search">
-  <input type="search" id="searchInput" placeholder="搜尋問題" />
-</div>
-若此段在 Elements 中能看到，但畫面無法顯示，代表 CSS 規則擋住／位置錯誤。
-
-確認 .faq-search 底下有正確 margin-top 推開：
-
+#3 QA 卡片頂邊對齊
 css
 複製
 編輯
-.faq-search {
-  margin: 12px auto 0;       /* 上方與 .page-title 保持 12px 空隙 */
-  width: 350px;              /* 與設計稿一致 */
-  height: 33px;
+/* ▉ FAQ 列表區 */
+.faq-card{
+    margin: .4rem 20px 1.2rem;   /* ★ 上緣 0.4rem，與設計圖一致；下緣保留原 1.2rem */
+    padding: 1rem;
+    background: var(--faq-bg);
+    border: 1.6px solid var(--faq-border);
+    border-radius: 8px;
 }
-如果缺少這一段，請直接貼上到 style.css，並放在最上方的推開主內容區塊（main, .category-bar, .page-title, .faq-search, .faq-list { margin-top:104px; }）之下。
-
-調整搜尋框本體 #searchInput：
-
+#4 確認搜尋框寬度 & 置中
 css
 複製
 編輯
-#searchInput {
-  width: 100%;
-  height: 100%;
-  background: #FFF5E1 url("FAQphoto/searchIcon.svg") 12px center no-repeat;
-  background-size: 16px 16px;
-  border: 1.5px solid #8A1C1C;
-  border-radius: 12px;
-  padding-left: 40px;       /* 左側留 40px 放大鏡＋文字 */
-  font-size: 14px;
-  color: #8A1C1C;
+.faq-search{
+    margin: 12px auto 0;
+    width: 350px;
+    max-width: calc(100% - 40px);   /* ★ 對 390px 裝置保險，不超出左右 20px */
 }
-#searchInput::placeholder {
-  color: #B6B6B6;
-}
-注意：請檢查 searchIcon.svg 是否存在於 public/FAQphoto/，且檔名、大小寫完全吻合（範例中不含相對路徑前導斜線）。
-
-如果搜尋框完全看不到，請在 DevTools → Elements 中選擇 .faq-search，確認它是否被隱藏（display: none）或高度被設為 0。若有其他重複規則影響，可臨時加入：
-
-css
-複製
-編輯
-.faq-search {
-  display: block !important;
-  visibility: visible !important;
-}
-#searchInput {
-  display: block !important;
-  visibility: visible !important;
-}
-最後，一定要重新 Refresh（無痕視窗或清空快取），確保 style.css 變動已經被正確載入。
-

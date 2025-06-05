@@ -8,14 +8,14 @@
   <!-- 載入樣式 -->
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet" />
-  <!-- axios（若要串後端再用到） -->
+  <!-- axios（後端串接時才用到） -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
   <!-- 非手機橫向遮罩 -->
   <div id="non-mobile">請使用手機直向瀏覽</div>
 
-  <!-- ▉ 橘色 Banner + Logo 固定區（總高度 104px）-->
+  <!-- ▉ 橘色 Banner + Logo 固定區（總高度 = 44px + 60px = 104px） -->
   <div class="banner-fixed">
     <!-- 上半 44px：漢堡 + Profile Icon -->
     <header class="banner">
@@ -49,7 +49,7 @@
     <button class="category-btn">手工香</button>
   </nav>
 
-  <!-- ▉ FAQ 列表（由 JavaScript 動態插入）-->
+  <!-- ▉ FAQ 列表（由 JavaScript 動態插入） -->
   <main id="faq-list" class="faq-list">
     <!-- 初始不放任何卡片，app.js 會直接填入 -->
   </main>
@@ -57,7 +57,7 @@
   <!-- ▉ ▲TOP 按鈕 -->
   <a href="#" id="to-top" class="to-top">▲TOP</a>
 
-  <!-- ▉ Footer （固定在最下方）-->
+  <!-- ▉ Footer （固定在最下方） -->
   <footer class="footer">
     <address>
       承天中承府<br />
@@ -65,18 +65,10 @@
       營業時間：早上10:30～凌晨3:00
     </address>
     <div class="icons">
-      <a href="https://g.co/kgs/pSEKPmJ" target="_blank">
-        <img src="FAQphoto/mapicon.png" alt="Map" />
-      </a>
-      <a href="https://www.instagram.com/money__5288/" target="_blank">
-        <img src="FAQphoto/igicon.png" alt="IG" />
-      </a>
-      <a href="https://line.me/ti/g2/xEqS4PCOod0NtEpVEtNx09KmQ-lyb9jeAIRxTA" target="_blank">
-        <img src="FAQphoto/lineicon.png" alt="LINE" />
-      </a>
-      <a href="https://www.tiktok.com/@money__5288" target="_blank">
-        <img src="FAQphoto/tiktokicon.png" alt="TikTok" />
-      </a>
+      <a href="https://g.co/kgs/pSEKPmJ" target="_blank"><img src="FAQphoto/mapicon.png" alt="Map" /></a>
+      <a href="https://www.instagram.com/money__5288/" target="_blank"><img src="FAQphoto/igicon.png" alt="IG" /></a>
+      <a href="https://line.me/ti/g2/xEqS4PCOod0NtEpVEtNx09KmQ-lyb9jeAIRxTA" target="_blank"><img src="FAQphoto/lineicon.png" alt="LINE" /></a>
+      <a href="https://www.tiktok.com/@money__5288" target="_blank"><img src="FAQphoto/tiktokicon.png" alt="TikTok" /></a>
     </div>
   </footer>
 

@@ -77,7 +77,7 @@ document.querySelectorAll('.category-btn').forEach(btn => {
 
     const cat = btn.textContent.trim();
 
-    // 真正串後端時，可以啟用下面這段，並把 demo 範例註解掉：
+    // 真正串後端時，請把下面這段註解打開，並移除 demo 部分
     /*
     axios
       .get(`/api/faq?category=${encodeURIComponent(cat)}`)

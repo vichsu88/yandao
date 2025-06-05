@@ -57,7 +57,7 @@ body {
   z-index: 1001;         /* 比 logo-wrap 高一層 */
 }
 
-/* 漢堡 Icon：高度 24px，底部貼齊 104px → top = 104 - 24 = 80px */
+/* 漢堡 Icon：24px，高度底部貼齊 104px → top = 104 - 24 = 80px */
 #hamburger {
   position: absolute;
   left: 20px;
@@ -80,7 +80,7 @@ body {
   border-radius: 2px;
 }
 
-/* Profile Icon：高度 40px，底部貼齊 104px → top = 104 - 40 = 64px */
+/* Profile Icon：40px，高度底部貼齊 104px → top = 104 - 40 = 64px */
 .profile {
   position: absolute;
   right: 20px;
@@ -104,22 +104,22 @@ body {
   bottom: 0;             /* 讓 Logo 底部貼齊 104px */
   left: 50%;
   transform: translateX(-50%);
-  height: 60px;          /* 確保 Logo 置中且底部齊平 */
+  height: 60px;          /* 固定高度 60px，使 Logo 底部齊平 */
   width: auto;
   z-index: 1002;         /* 最高層，避免被遮住 */
   pointer-events: none;
 }
 
-/* ▉ 推開主內容：避免被橘色 Banner 遮住 */
+/* ▉ 推開主內容：避免被橘色 Banner 遮住（改為 4px ）*/
 main,
 .category-bar,
 .page-title,
 .faq-search,
 .faq-list {
-  margin-top: 104px;     /* 44 + 60 = 104 px */
+  margin-top: 4px;   /* 只往下推 4px，不再使用 104px，留白由單獨設定 */
 }
 
-/* ▉ 常見問題 標題 */
+/* ▉ 常見問題 標題（改成 margin-top:120px） */
 .page-title {
   position: relative;                 /* 使 z-index 生效 */
   text-align: center;
@@ -127,10 +127,10 @@ main,
   font-size: 1.05rem;
   color: #000;
   border-bottom: 2.5px solid var(--faq-border);
-  margin: 24px auto 0;
+  margin: 120px auto 0;               /* 直接下移 120px */
   width: fit-content;
   padding-bottom: 4px;
-  background: var(--bg); /* 讓標題背景保持白色 */
+  background: var(--bg); /* 讓標題底色保持白色 */
   z-index: 500;
 }
 
@@ -138,6 +138,7 @@ main,
 .faq-search {
   margin: 12px auto 0;
   width: 350px;
+  max-width: calc(100% - 40px);    /* 左右各留 20px 空間 */
   height: 33px;
 }
 #searchInput {
@@ -163,6 +164,7 @@ main,
   gap: 0.6rem;
   justify-content: space-between;
   flex-wrap: nowrap;
+  margin-bottom: 12px;   /* 分類列底與 QA 卡片留 12px */
 }
 .category-btn {
   background: #FFF5E1;
@@ -185,7 +187,7 @@ main,
   padding-bottom: 2rem;
 }
 .faq-card {
-  margin: 1.2rem 20px;
+  margin: 0.4rem 20px 1.2rem;   /* 頂距 0.4rem、左右 20px、下 1.2rem */
   padding: 1rem;
   background: var(--faq-bg);
   border: 1.6px solid var(--faq-border);
