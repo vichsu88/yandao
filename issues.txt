@@ -1,64 +1,91 @@
-下面是一份 **整合所有現況需求、可直接貼用** 的最新版 `issues.txt`（v5）。
-依序列出 #1–#6，每項都含 **檔案、CSS/HTML 片段、數值**，一次放進 Codex 也 OK；若想逐步交辦，仍可照編號分批貼。
+===================================================
+🔥 FAQ 畫面精修任務清單 v8（固定 Banner 與分類點擊）
+===================================================
+
+#10 固定 banner + logo 區不隨頁面滾動
+---------------------------------------------------
+檔案：public/style.css, public/faq.html
+
+🎯 目標：整個 header（含漢堡、人像）+ logo 不可滑動，要始終固定在頁面最上方。
+
+CSS 修改：
+```css
+.banner-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #F4CDA7;
+  z-index: 1000;
+  height: 132px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+}
+.logo-wrap {
+  margin-top: -12px;
+}
+main, .faq-list {
+  padding-top: 144px; /* 推開內容讓出 banner 空間 */
+}
+HTML 結構修改（faq.html）：
+
+html
+複製
+編輯
+<!-- 包住 header 和 logo-wrap -->
+<div class="banner-wrap">
+  <header class="banner">
+    <button id="hamburger" aria-label="選單">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+    <img src="FAQphoto/membericon.png" class="profile" alt="會員" />
+  </header>
+  <div class="logo-wrap">
+    <img src="FAQphoto/bannerlogo.png" alt="煙島元帥" class="banner-logo" />
+  </div>
+</div>
+#11 點擊分類按鈕後有樣式變化（active 狀態）
+檔案：public/app.js、style.css
+
+JS（點擊時切換 active）：
+
+js
+複製
+編輯
+document.querySelectorAll('.category-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+CSS：
+
+css
+複製
+編輯
+.category-btn {
+  background: #FFF5E1;
+  color: #8A1C1C;
+  border: 1.5px solid #8A1C1C;
+}
+.category-btn.active {
+  background: #8A1C1C;
+  color: #fff;
+  border-color: #8A1C1C;
+}
+備註：無論點哪顆，其他要自動移除 .active，只留當前選中者有樣式。
+
+===================================================
+
+yaml
+複製
+編輯
 
 ---
 
-````txt
-===================================================
-🔥 FAQ 畫面精修任務清單 (v5)    2025-06-05
-===================================================
+⚠️ 貼完之後請你輸入：
 
-📱 參考裝置：iPhone 14（390 × 844 px）
-📐 左右固定留白：20 px
-🎨 主題色：
-  --bg         #FDF8F2
-  --primary    #8A1C1C
-  --faq-bg     #FFF5E1
-  --faq-border #D9B88A
-## #4 搜尋框（顯示＋樣式＋功能）
-
-檔案：public/faq.html、public/style.css、app.js
-
-HTML（置於 `.page-title` 後）：
-
-```html
-<div class="faq-search">
-  <input type="search" id="searchInput" placeholder="搜尋問題">
-</div>
-```
-
-CSS：
-
-```css
-.faq-search{
-  position:absolute; left:20px; top:143px;
-  width:350px; height:33px;
-}
-#searchInput{
-  width:100%; height:100%;
-  background:var(--faq-bg) url("/public/FAQphoto/searchIcon.png") 10px center no-repeat;
-  background-size:16px 16px;
-  border:1px solid var(--primary); border-radius:6px;
-  padding-left:36px; font-size:14px; color:var(--primary);
-}
-#searchInput::placeholder{color:#B6B6B6;}
-```
-
-JS（`app.js`）：
-
-```js
-const faqs=[
-  {q:"請問收驚要準備什麼？",a:"...",tags:["收驚","準備","供品"]},
-  {q:"手工香可以宅配嗎？",a:"...",tags:["手工香","宅配"]},
-];
-const listEl=document.querySelector("#faqList"); // 你的 FAQ 容器
-function render(data){ /* 把 data 渲染到 listEl… */ }
-document.getElementById("searchInput").addEventListener("input",e=>{
-  const kw=e.target.value.trim();
-  if(!kw){render(faqs);return;}
-  const filtered=faqs.filter(f=>f.tags.some(t=>t.includes(kw)));
-  render(filtered);
-});
-render(faqs);
-```
+請完成 issues.txt #10-#11
 
