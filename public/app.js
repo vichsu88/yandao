@@ -1,95 +1,64 @@
-/* ====================== 基本設定 ====================== */
-const BASE = '/api/faq';        // 後端 Flask 端點（同網域可用相對路徑）
-const catEl = document.getElementById('category-bar');
+/* ====================== FAQ 渲染 & 搜尋 功能 ====================== */
 const faqEl = document.getElementById('faq-list');
 
-/* ---- 若後端、DB 都還沒接通時的假資料 ---- */
-const DUMMY_CATS  = ['中承府','問事','收驚','手工香'];
-const DUMMY_FAQ   = cat => [{
-  category:cat,
-  question:`${cat} 範例問題？`,
-  answer:`${cat} 範例答案：\n- Step 1\n- Step 2`,
-  link:[], pics:''
-}];
+/* 產生 FAQ 卡片的函式 */
+function renderFaq(list) {
+  faqEl.innerHTML = ''; // 清空
 
-/* ====================== 取得類別 ====================== */
-axios.get(`${BASE}/categories`)
-  .then(res=>{
-    const cats = res.data.length ? res.data : DUMMY_CATS;
-    buildCategoryBar(cats);
-    changeCategory(cats[0]);             // 預設載入第一個
-  })
-  .catch(()=>{
-    buildCategoryBar(DUMMY_CATS);
-    changeCategory(DUMMY_CATS[0]);
-  });
+  if (!Array.isArray(list) || list.length === 0) {
+    const empty = document.createElement('div');
+    empty.textContent = '找不到相關問題';
+    empty.style = 'text-align:center; margin:2rem 0; color:#999;';
+    faqEl.appendChild(empty);
+    return;
+  }
 
-/* ------------------ 建立分類按鈕 ------------------ */
-function buildCategoryBar(cats){
-  catEl.innerHTML='';
-  cats.forEach(c=>{
-    const btn=document.createElement('button');
-    btn.className='category-btn';
-    btn.textContent=c; btn.dataset.cat=c;
-    btn.onclick=()=>changeCategory(c);
-    catEl.appendChild(btn);
-  });
-}
+  list.forEach(item => {
+    // 外層卡片
+    const card = document.createElement('div');
+    card.className = 'faq-card';
 
-/* ------------------ 切換分類 ------------------ */
-function changeCategory(cat){
-  document.querySelectorAll('.category-btn')
-    .forEach(b=>b.classList.toggle('active',b.dataset.cat===cat));
-
-  axios.get(`${BASE}?category=${encodeURIComponent(cat)}`)
-    .then(r=>{
-      const list = r.data.length ? r.data : DUMMY_FAQ(cat);
-      renderFaq(list);
-    })
-    .catch(()=>renderFaq(DUMMY_FAQ(cat)));
-}
-
-/* ------------------ FAQ 畫面 ------------------ */
-function renderFaq(list){
-  faqEl.innerHTML='';
-  list.forEach(item=>{
-    /* 卡片外層 */
-    const card=document.createElement('div');
-    card.className='faq-card';                // ★ 新 class
-
-    /* 問題列 */
-    const q=document.createElement('div');
-    q.className='question';
-    q.innerHTML=`<span>Q: ${item.question}</span><span class="toggle">＋</span>`;
-    q.onclick=()=>card.classList.toggle('open');
+    // 問題列
+    const q = document.createElement('div');
+    q.className = 'question';
+    q.innerHTML = `<span>Q: ${item.question}</span><span class="toggle">＋</span>`;
+    q.onclick = () => {
+      card.classList.toggle('open');
+    };
     card.appendChild(q);
 
-    /* 答案列 */
-    const a=document.createElement('div');
-    a.className='answer';
-    a.textContent=item.answer;
+    // 答案列
+    const a = document.createElement('div');
+    a.className = 'answer';
+    a.textContent = item.answer || '';
 
-    /* 參考連結（有才顯示） */
-    if(item.link?.length){
-      const links=document.createElement('div');
-      links.style.marginTop='.6rem';
-      item.link.forEach((url,i)=>{
-        const l=document.createElement('a');
-        l.href=url; l.target='_blank'; l.rel='noopener';
-        l.textContent=item['link-string']?.[i] || `參考 ${i+1}`;
-        l.style.display='block';
+    // 參考連結 (如果有陣列 item.link)
+    if (Array.isArray(item.link) && item.link.length > 0) {
+      const links = document.createElement('div');
+      links.style.marginTop = '.6rem';
+      item.link.forEach((url, idx) => {
+        if (!url) return;
+        const l = document.createElement('a');
+        l.href = url;
+        l.target = '_blank';
+        l.rel = 'noopener';
+        l.textContent = Array.isArray(item['link-string'])
+          ? (item['link-string'][idx] || `參考 ${idx + 1}`)
+          : `參考 ${idx + 1}`;
+        l.style.display = 'block';
         links.appendChild(l);
       });
       a.appendChild(links);
     }
 
-    /* 圖片（有才顯示） */
-    if(item.pics){
-      item.pics.split(',').forEach(p=>{
-        if(!p.trim()) return;
-        const img=document.createElement('img');
-        img.src=p.trim();
-        img.style='max-width:100%;margin-top:.6rem';
+    // 圖片 (如果有 ansphoto 字串)
+    if (typeof item.ansphoto === 'string' && item.ansphoto.trim()) {
+      item.ansphoto.split(',').forEach(p => {
+        const src = p.trim();
+        if (!src) return;
+        const img = document.createElement('img');
+        img.src = `FAQphoto/${src}`;
+        img.style = 'max-width:100%; margin-top:.6rem; border-radius:6px;';
         a.appendChild(img);
       });
     }
@@ -99,39 +68,80 @@ function renderFaq(list){
   });
 }
 
-/* ------------------ TOP 平滑滾動 ------------------ */
-document.getElementById('to-top').onclick=e=>{
-  e.preventDefault();
-  window.scrollTo({top:0,behavior:'smooth'});
-};
+/* －－－－－－ 分類按鈕 －－－－－－ */
+document.querySelectorAll('.category-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    // 切換按鈕樣式
+    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
 
-/* ------------------ FAQ 搜尋 ------------------ */
-const faqs=[
-  {q:"請問收驚要準備什麼？",a:"...",tags:["收驚","準備","供品"]},
-  {q:"手工香可以宅配嗎？",a:"...",tags:["手工香","宅配"]},
+    const cat = btn.textContent.trim();
+
+    // 真正串後端時，可以啟用下面這段，並把 demo 範例註解掉：
+    /*
+    axios
+      .get(`/api/faq?category=${encodeURIComponent(cat)}`)
+      .then(r => renderFaq(r.data))
+      .catch(() => renderFaq([]));
+    */
+
+    // Demo：使用假資料，顯示「【分類】範例問題」
+    const fake = [{
+      question: `【${cat}】範例問題？`,
+      answer: `${cat} 範例答案：\n- Step 1\n- Step 2`,
+      link: [],
+      'link-string': [],
+      ansphoto: ''
+    }];
+    renderFaq(fake);
+  });
+});
+
+// 首次載入，強制觸發第一顆 active（中承府）
+document.querySelector('.category-btn.active')?.click();
+
+/* －－－－－－ TOP 平滑滾動 －－－－－－ */
+document.getElementById('to-top').addEventListener('click', e => {
+  e.preventDefault();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+/* －－－－－－ 搜尋框 (Client-side Demo 搜尋) －－－－－－ */
+const demoFaqs = [
+  { q: "請問收驚要準備什麼？", a: "示範：記得穿衣服穿衣服穿衣服...", tags: ["收驚", "準備", "供品"] },
+  { q: "手工香可以宅配嗎？", a: "示範回答：可以透過宅配到府。", tags: ["手工香", "宅配"] },
+  { q: "問事服務內容有哪些？", a: "示範：問事可幫你解決各種疑難雜症。", tags: ["問事", "服務"] }
 ];
-const listEl=document.querySelector("#faq-list");
-function render(data){
-  listEl.innerHTML='';
-  data.forEach(item=>{
-    const card=document.createElement('div');
-    card.className='faq-card';
-    const q=document.createElement('div');
-    q.className='question';
-    q.innerHTML=`<span>Q: ${item.q}</span><span class="toggle">＋</span>`;
-    q.onclick=()=>card.classList.toggle('open');
-    const a=document.createElement('div');
-    a.className='answer';
-    a.textContent=item.a;
+const listEl = document.getElementById("faq-list");
+
+function renderSearch(data) {
+  listEl.innerHTML = '';
+  data.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'faq-card';
+    const q = document.createElement('div');
+    q.className = 'question';
+    q.innerHTML = `<span>Q: ${item.q}</span><span class="toggle">＋</span>`;
+    q.onclick = () => card.classList.toggle('open');
+    const a = document.createElement('div');
+    a.className = 'answer';
+    a.textContent = item.a;
     card.appendChild(q);
     card.appendChild(a);
     listEl.appendChild(card);
   });
 }
-document.getElementById("searchInput").addEventListener("input",e=>{
-  const kw=e.target.value.trim();
-  if(!kw){render(faqs);return;}
-  const filtered=faqs.filter(f=>f.tags.some(t=>t.includes(kw)));
-  render(filtered);
+
+document.getElementById("searchInput").addEventListener("input", e => {
+  const kw = e.target.value.trim();
+  if (!kw) {
+    renderSearch(demoFaqs);
+    return;
+  }
+  const filtered = demoFaqs.filter(f =>
+    f.tags.some(t => t.includes(kw)) || f.q.includes(kw)
+  );
+  renderSearch(filtered);
 });
-render(faqs);
+// 首次載入顯示所有 Demo
+renderSearch(demoFaqs);

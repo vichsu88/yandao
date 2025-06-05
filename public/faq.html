@@ -5,39 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>常見問題｜煙島元帥</title>
 
-  <!-- 样式 -->
+  <!-- 載入樣式 -->
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet" />
-
-  <!-- axios（若要串後端可用）-->
+  <!-- axios（若要串後端再用到） -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
-  <!-- ▉ 非手機橫向遮罩 -->
+  <!-- 非手機橫向遮罩 -->
   <div id="non-mobile">請使用手機直向瀏覽</div>
 
-  <!-- ▉ 44px 安全區（給動態島） -->
-  <header class="banner">
-    <!-- 漢堡 -->
-    <button id="hamburger" aria-label="選單">
-      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-    </button>
-    <!-- 會員 -->
-    <img src="FAQphoto/membericon.png" class="profile" alt="會員" />
-  </header>
+  <!-- ▉ 橘色 Banner + Logo 固定區（總高度 104px）-->
+  <div class="banner-fixed">
+    <!-- 上半 44px：漢堡 + Profile Icon -->
+    <header class="banner">
+      <button id="hamburger" aria-label="選單">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+      <img src="FAQphoto/membericon.png" class="profile" alt="會員" />
+    </header>
 
-  <!-- ▉ Logo 區（米白底）-->
-  <div class="logo-wrap">
-    <img src="FAQphoto/bannerlogo.png" alt="煙島元帥" class="banner-logo" />
+    <!-- 下半 60px：Logo 放置區 -->
+    <div class="logo-wrap">
+      <img src="FAQphoto/bannerlogo.png" alt="煙島元帥" class="banner-logo" />
+    </div>
   </div>
 
-  <!-- ▉ 常見問題標題 -->
+  <!-- ▉ 主內容：常見問題 標題 -->
   <h2 class="page-title">常見問題</h2>
+
+  <!-- ▉ 搜尋框 -->
   <div class="faq-search">
-    <input type="search" id="searchInput" placeholder="搜尋問題">
+    <input type="search" id="searchInput" placeholder="搜尋問題" />
   </div>
 
-  <!-- ▉ 分類按鈕 -->
+  <!-- ▉ 分類按鈕列 -->
   <nav id="category-bar" class="category-bar">
     <button class="category-btn active">中承府</button>
     <button class="category-btn">問事</button>
@@ -45,23 +49,15 @@
     <button class="category-btn">手工香</button>
   </nav>
 
-  <!-- ▉ FAQ 列表 -->
+  <!-- ▉ FAQ 列表（由 JavaScript 動態插入）-->
   <main id="faq-list" class="faq-list">
-    <section class="faq-card">
-      <div class="question">
-        <span>Q: 中承府 範例問題？</span>
-        <span class="toggle">＋</span>
-      </div>
-      <div class="answer">
-        中承府 範例答案：<br>- Step 1<br>- Step 2
-      </div>
-    </section>
+    <!-- 初始不放任何卡片，app.js 會直接填入 -->
   </main>
 
-  <!-- ▉ TOP -->
-  <a href="#" class="to-top">▲TOP</a>
+  <!-- ▉ ▲TOP 按鈕 -->
+  <a href="#" id="to-top" class="to-top">▲TOP</a>
 
-  <!-- ▉ Footer -->
+  <!-- ▉ Footer （固定在最下方）-->
   <footer class="footer">
     <address>
       承天中承府<br />
@@ -69,21 +65,22 @@
       營業時間：早上10:30～凌晨3:00
     </address>
     <div class="icons">
-      <a href="https://g.co/kgs/pSEKPmJ" target="_blank"><img src="FAQphoto/mapicon.png"   alt="Map" /></a>
-      <a href="https://www.instagram.com/money__5288/" target="_blank"><img src="FAQphoto/igicon.png"    alt="IG"  /></a>
-      <a href="https://line.me/ti/g2/xEqS4PCOod0NtEpVEtNx09KmQ-lyb9jeAIRxTA" target="_blank"><img src="FAQphoto/lineicon.png"  alt="LINE"/></a>
-      <a href="https://www.tiktok.com/@money__5288" target="_blank"><img src="FAQphoto/tiktokicon.png" alt="TikTok"/></a>
+      <a href="https://g.co/kgs/pSEKPmJ" target="_blank">
+        <img src="FAQphoto/mapicon.png" alt="Map" />
+      </a>
+      <a href="https://www.instagram.com/money__5288/" target="_blank">
+        <img src="FAQphoto/igicon.png" alt="IG" />
+      </a>
+      <a href="https://line.me/ti/g2/xEqS4PCOod0NtEpVEtNx09KmQ-lyb9jeAIRxTA" target="_blank">
+        <img src="FAQphoto/lineicon.png" alt="LINE" />
+      </a>
+      <a href="https://www.tiktok.com/@money__5288" target="_blank">
+        <img src="FAQphoto/tiktokicon.png" alt="TikTok" />
+      </a>
     </div>
   </footer>
 
-  <!-- ▉ FAQ 展開 JS（簡單示範）-->
-  <script>
-    document.querySelectorAll('.faq-card .toggle').forEach(t=>{
-      t.addEventListener('click',()=>{
-        const card=t.closest('.faq-card');
-        card.classList.toggle('open');
-      });
-    });
-  </script>
+  <!-- ▉ FAQ 展開 + 搜尋 功能 -->
+  <script src="app.js"></script>
 </body>
 </html>

@@ -1,112 +1,124 @@
-請完成 issues.txt #15-#16
-即可。
+===============================================
 
-txt
-複製
-編輯
-===================================================
-🔥 FAQ 畫面增量任務 v10
-===================================================
+📱 版型：iPhone 14 (390×844)   左右邊距固定 20 px  
+🎨 主題色：  
+  – --bg        #FDF8F2  
+  – --faq-bg    #FFF5E1  
+  – --faq-border #D9B88A  
+  – --primary   #8A1C1C  
 
-#15 固定整塊橘色區（漢堡＋Logo＋小人）於頂端
 ---------------------------------------------------
-● HTML（public/faq.html）
-1. 在 `<header class="banner">` 與 `<div class="logo-wrap">` 外層加一個：
-   ```html
-   <div class="banner-fixed">
-     …現有 header…
-     …現有 logo-wrap…
-   </div>
-● CSS（public/style.css）
-2. 追加／覆蓋：
+#1 修正「常見問題」標題 (.page-title) 不顯示
+---------------------------------------------------
+檔案：public/style.css
+
+1. 目前 `.page-title` 被 banner-fixed 上層覆蓋，需要調整 z-index 與 margin-top，確保它露出並置於橘色區下方：
+   ```css
+   /* 修改前（可能看不到） */
+   .page-title {
+     /* margin:24px auto 0; */
+     /* background: var(--bg); */
+     /* z-index: 10; */
+   }
+→ 請改為：
 
 css
 複製
 編輯
-.banner-fixed{
-  position:fixed;
-  top:0; left:0; right:0;
-  background:#F4CDA7;
-  z-index:1000;
+.page-title {
+  position: relative;                 /* 使 z-index 生效 */
+  margin: 24px auto 0;                /* 下移 24px，自動置中 */
+  background: var(--bg);              /* 背景維持白色 */
+  z-index: 500;                       /* 確保在 banner-fixed 之下，但比搜尋框高 */
+  padding-bottom: 4px;                /* 與設計圖一致 */
+  width: fit-content;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #000;
+  border-bottom: 2.5px solid var(--faq-border);
 }
-/* header、logo-wrap 原本背景也保留 #F4CDA7 可無接縫 */
+因 banner-fixed 高度共 104px，已使用全域 margin-top 推開主內容，但 .page-title 仍可能被橘色區部分遮蔽，請在 CSS 最上方確認已加：
 
-/* 把主內容推下（44＋60=104，再給 8px 餘裕）*/
+css
+複製
+編輯
+/* ▉ 推開主內容：避免被 banner-fixed 遮住 */
 main,
 .category-bar,
 .page-title,
 .faq-search,
-.faq-list{
-  margin-top:112px;
+.faq-list {
+  margin-top: 104px;   /* 44px (banner 上半) + 60px (logo 區) = 104px */
 }
-#16 分類按鈕點擊變色 + 切換 FAQ
-● CSS（public/style.css）
+若已存在上述規則但 .page-title 依舊不顯示，請特別檢查有沒有被其他規則 override；可再補上：
 
 css
 複製
 編輯
-.category-btn{
-  background:#FFF5E1; color:#8A1C1C;
-  border:1.5px solid #8A1C1C; border-radius:9999px;
-  padding:.38rem 1.15rem; font-size:.92rem; cursor:pointer;
+.page-title {
+  display: block !important;
 }
-.category-btn.active{
-  background:#8A1C1C; color:#fff; border-color:#8A1C1C;
+瀏覽器 DevTools → Elements 中確認 <h2 class="page-title">常見問題</h2> 是否真的出現在 <body> 內，若找不到，再檢查 HTML 檔首尾標籤是否對齊，確保 <body> 裡 <h2> 沒有誤移到 .banner-fixed 之外。
+
+#2 修正「搜尋框」(.faq-search / #searchInput) 不顯示
+檔案：public/style.css
+
+檢查 HTML 已經包含：
+
+html
+複製
+編輯
+<h2 class="page-title">常見問題</h2>
+<div class="faq-search">
+  <input type="search" id="searchInput" placeholder="搜尋問題" />
+</div>
+若此段在 Elements 中能看到，但畫面無法顯示，代表 CSS 規則擋住／位置錯誤。
+
+確認 .faq-search 底下有正確 margin-top 推開：
+
+css
+複製
+編輯
+.faq-search {
+  margin: 12px auto 0;       /* 上方與 .page-title 保持 12px 空隙 */
+  width: 350px;              /* 與設計稿一致 */
+  height: 33px;
 }
-● JS（public/app.js）
+如果缺少這一段，請直接貼上到 style.css，並放在最上方的推開主內容區塊（main, .category-bar, .page-title, .faq-search, .faq-list { margin-top:104px; }）之下。
 
-在檔案最上方確認有：
+調整搜尋框本體 #searchInput：
 
-js
+css
 複製
 編輯
-const BASE = "/api/faq"; // 若你的 Flask 路徑不同請修改
-取代或新增以下函式與監聽：
+#searchInput {
+  width: 100%;
+  height: 100%;
+  background: #FFF5E1 url("FAQphoto/searchIcon.svg") 12px center no-repeat;
+  background-size: 16px 16px;
+  border: 1.5px solid #8A1C1C;
+  border-radius: 12px;
+  padding-left: 40px;       /* 左側留 40px 放大鏡＋文字 */
+  font-size: 14px;
+  color: #8A1C1C;
+}
+#searchInput::placeholder {
+  color: #B6B6B6;
+}
+注意：請檢查 searchIcon.svg 是否存在於 public/FAQphoto/，且檔名、大小寫完全吻合（範例中不含相對路徑前導斜線）。
 
-js
+如果搜尋框完全看不到，請在 DevTools → Elements 中選擇 .faq-search，確認它是否被隱藏（display: none）或高度被設為 0。若有其他重複規則影響，可臨時加入：
+
+css
 複製
 編輯
-// 點擊分類按鈕
-document.querySelectorAll('.category-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    // 樣式切換
-    document.querySelectorAll('.category-btn')
-      .forEach(b=>b.classList.toggle('active',b===btn));
+.faq-search {
+  display: block !important;
+  visibility: visible !important;
+}
+#searchInput {
+  display: block !important;
+  visibility: visible !important;
+}
+最後，一定要重新 Refresh（無痕視窗或清空快取），確保 style.css 變動已經被正確載入。
 
-    // 取得分類文字
-    const cat = btn.textContent.trim();
-
-    // 叫後端拿 FAQ
-    axios.get(`${BASE}?category=${encodeURIComponent(cat)}`)
-         .then(r=>renderFaq(r.data))
-         .catch(()=>renderFaq([]));
-  });
-});
-
-// 首次載入預設第一顆分類
-document.querySelector('.category-btn.active')?.click();
-後端 MongoDB：請確定 /api/faq?category= 能回傳
-
-json
-複製
-編輯
-[
-  {
-    "category":"中承府",
-    "question":"…",
-    "answer":"…",
-    "ansphoto":"step1.png,step2.png",
-    "link":["https://…"],
-    "link_str":["官方網站"]
-  },
-  …
-]
-renderFaq 內已有處理 ansphoto 與超連結邏輯，不需再改。
-
-===================================================
-
-複製
-編輯
-
-貼上、交給 Codex　後，整塊橘色 Banner 會固定不動；  
-分類按鈕點擊會紅底白字並且載入對應 FAQ。 若仍有跑版再截圖告訴我！
