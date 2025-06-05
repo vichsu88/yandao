@@ -121,6 +121,7 @@ main,
 
 /* ▉ 常見問題 標題 */
 .page-title {
+  position: relative;                 /* 使 z-index 生效 */
   text-align: center;
   font-weight: 600;
   font-size: 1.05rem;
