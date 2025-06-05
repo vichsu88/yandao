@@ -1,27 +1,22 @@
 /* ====================== 基本設定 ====================== */
-const BASE = '/api/faq';        // 後端 Flask 端點（同網域可用相對路徑）
 const catEl = document.getElementById('category-bar');
 const faqEl = document.getElementById('faq-list');
+let allData = [];
 
-/* ---- 若後端、DB 都還沒接通時的假資料 ---- */
-const DUMMY_CATS  = ['中承府','問事','收驚','手工香'];
-const DUMMY_FAQ   = cat => [{
-  category:cat,
-  question:`${cat} 範例問題？`,
-  answer:`${cat} 範例答案：\n- Step 1\n- Step 2`,
-  link:[], pics:''
-}];
-
-/* ====================== 取得類別 ====================== */
-axios.get(`${BASE}/categories`)
-  .then(res=>{
-    const cats = res.data.length ? res.data : DUMMY_CATS;
+/* ====================== 載入 FAQ 資料 ====================== */
+fetch('FAQ_Content.json')
+  .then(res => res.json())
+  .then(data => {
+    allData = data;
+    const cats = [];
+    data.forEach(item => {
+      if (!cats.includes(item.category)) cats.push(item.category);
+    });
     buildCategoryBar(cats);
-    changeCategory(cats[0]);             // 預設載入第一個
+    changeCategory(cats[0]); // 預設載入第一個
   })
-  .catch(()=>{
-    buildCategoryBar(DUMMY_CATS);
-    changeCategory(DUMMY_CATS[0]);
+  .catch(err => {
+    console.error('Failed to load FAQ data:', err);
   });
 
 /* ------------------ 建立分類按鈕 ------------------ */
@@ -41,12 +36,8 @@ function changeCategory(cat){
   document.querySelectorAll('.category-btn')
     .forEach(b=>b.classList.toggle('active',b.dataset.cat===cat));
 
-  axios.get(`${BASE}?category=${encodeURIComponent(cat)}`)
-    .then(r=>{
-      const list = r.data.length ? r.data : DUMMY_FAQ(cat);
-      renderFaq(list);
-    })
-    .catch(()=>renderFaq(DUMMY_FAQ(cat)));
+  const list = allData.filter(item => item.category === cat);
+  renderFaq(list);
 }
 
 /* ------------------ FAQ 畫面 ------------------ */
