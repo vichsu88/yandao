@@ -104,3 +104,34 @@ document.getElementById('to-top').onclick=e=>{
   e.preventDefault();
   window.scrollTo({top:0,behavior:'smooth'});
 };
+
+/* ------------------ FAQ 搜尋 ------------------ */
+const faqs=[
+  {q:"請問收驚要準備什麼？",a:"...",tags:["收驚","準備","供品"]},
+  {q:"手工香可以宅配嗎？",a:"...",tags:["手工香","宅配"]},
+];
+const listEl=document.querySelector("#faq-list");
+function render(data){
+  listEl.innerHTML='';
+  data.forEach(item=>{
+    const card=document.createElement('div');
+    card.className='faq-card';
+    const q=document.createElement('div');
+    q.className='question';
+    q.innerHTML=`<span>Q: ${item.q}</span><span class="toggle">＋</span>`;
+    q.onclick=()=>card.classList.toggle('open');
+    const a=document.createElement('div');
+    a.className='answer';
+    a.textContent=item.a;
+    card.appendChild(q);
+    card.appendChild(a);
+    listEl.appendChild(card);
+  });
+}
+document.getElementById("searchInput").addEventListener("input",e=>{
+  const kw=e.target.value.trim();
+  if(!kw){render(faqs);return;}
+  const filtered=faqs.filter(f=>f.tags.some(t=>t.includes(kw)));
+  render(filtered);
+});
+render(faqs);

@@ -102,3 +102,16 @@ body{
 .profile{
   top: 65px;                 /* 同理往下貼齊 */
 }
+
+.faq-search{
+  position:absolute; left:20px; top:143px;
+  width:350px; height:33px;
+}
+#searchInput{
+  width:100%; height:100%;
+  background:var(--faq-bg) url("/public/FAQphoto/searchIcon.png") 10px center no-repeat;
+  background-size:16px 16px;
+  border:1px solid var(--primary); border-radius:6px;
+  padding-left:36px; font-size:14px; color:var(--primary);
+}
+#searchInput::placeholder{color:#B6B6B6;}
