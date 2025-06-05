@@ -1,8 +1,15 @@
+下面是一份 **整合所有現況需求、可直接貼用** 的最新版 `issues.txt`（v5）。
+依序列出 #1–#6，每項都含 **檔案、CSS/HTML 片段、數值**，一次放進 Codex 也 OK；若想逐步交辦，仍可照編號分批貼。
+
+---
+
+````txt
 ===================================================
-🔥 FAQ 畫面精修任務清單 (v3)    2025-06-05
+🔥 FAQ 畫面精修任務清單 (v5)    2025-06-05
 ===================================================
 
-📱 版型：iPhone 14 (390×844)   |   左右邊距固定 20 px
+📱 參考裝置：iPhone 14（390 × 844 px）
+📐 左右固定留白：20 px
 🎨 主題色：
   --bg         #FDF8F2
   --primary    #8A1C1C
@@ -10,69 +17,161 @@
   --faq-border #D9B88A
 
 ---------------------------------------------------
-#3 調整「常見問題」標題位置
+#1 Banner 區 - Logo 尺寸與位置
 ---------------------------------------------------
 檔案：public/style.css
-1. `.page-title` 頂端需位於 banner 底線 **+ 44 px**，不得與 logo 重疊。  
-   → `margin-top:44px;`
-2. 必要時調整 z-index：`.banner-logo {z-index:100}`、`.page-title {z-index:10}`。
-3. 背景保持 `#FDF8F2`；底線 `2.5px solid #D9B88A`。
-4. 標題本身寬度依文字自適應並置中。
+1. 上半安全區 44 px 仍留白；`<img class="banner-logo">` 從安全區下緣開始：
+   ```css
+   .banner-logo{
+     position:absolute;
+     top:44px; left:50%; transform:translateX(-50%);
+     width:200px;            /* 或 max-width:40% 取較小值 */
+     height:auto; z-index:100;
+   }
+````
 
----------------------------------------------------
-#4 新增與顯示搜尋框
----------------------------------------------------
+2. 若需視覺微調，可再向下 `top:+4px` 讓雲朵略凸入米白區。
+
+---
+
+## #2 Profile（小人）icon 對位
+
+檔案：public/style.css、public/faq.html
+
+```css
+.profile{                 /* svg / img 皆可套用 */
+  position:absolute;
+  right:20px; top:10px;
+  width:40px; height:40px;
+  z-index:90;             /* 低於 logo 高於其他 */
+}
+```
+
+⚠️ 確保不再重疊漢堡 icon (`#hamburger{ left:20px; top:10px; }` 已 OK)。
+
+---
+
+## #3 「常見問題」標題置中與間距
+
+檔案：public/style.css
+
+```css
+.page-title{
+  display:block; width:fit-content; margin:44px auto 0;
+  font-weight:600; font-size:1.05rem; color:#000;
+  border-bottom:2.5px solid var(--faq-border);
+}
+```
+
+* `margin-top:44px` 讓標題與 logo 保持安全距。
+* `margin-left/right:auto` 完全水平置中。
+
+---
+
+## #4 搜尋框（顯示＋樣式＋功能）
+
 檔案：public/faq.html、public/style.css、app.js
-HTML（放 `.page-title` 之下）：
+
+HTML（置於 `.page-title` 後）：
+
 ```html
 <div class="faq-search">
-  <input type="search" id="searchInput" placeholder="搜尋問題" />
+  <input type="search" id="searchInput" placeholder="搜尋問題">
 </div>
+```
+
 CSS：
 
-css
-複製
-編輯
+```css
 .faq-search{
   position:absolute; left:20px; top:143px;
   width:350px; height:33px;
 }
 #searchInput{
   width:100%; height:100%;
-  background:#FFF5E1 url("/public/FAQphoto/searchIcon.png") 10px center no-repeat;
+  background:var(--faq-bg) url("/public/FAQphoto/searchIcon.png") 10px center no-repeat;
   background-size:16px 16px;
-  border:1px solid #8A1C1C; border-radius:6px;
-  padding-left:36px; font-size:14px; color:#8A1C1C;
+  border:1px solid var(--primary); border-radius:6px;
+  padding-left:36px; font-size:14px; color:var(--primary);
 }
 #searchInput::placeholder{color:#B6B6B6;}
-JS（app.js）：
+```
 
-假資料：
+JS（`app.js`）：
 
-js
-複製
-編輯
-const faqs = [
-  { q:"請問收驚要準備什麼？", a:"...", tags:["收驚","準備","供品"]},
-  { q:"手工香可以宅配嗎？",  a:"...", tags:["手工香","宅配"]},
+```js
+const faqs=[
+  {q:"請問收驚要準備什麼？",a:"...",tags:["收驚","準備","供品"]},
+  {q:"手工香可以宅配嗎？",a:"...",tags:["手工香","宅配"]},
 ];
-監聽 searchInput 的 input 事件，模糊比對 tags，即時篩選 FAQ。
+const listEl=document.querySelector("#faqList"); // 你的 FAQ 容器
+function render(data){ /* 把 data 渲染到 listEl… */ }
+document.getElementById("searchInput").addEventListener("input",e=>{
+  const kw=e.target.value.trim();
+  if(!kw){render(faqs);return;}
+  const filtered=faqs.filter(f=>f.tags.some(t=>t.includes(kw)));
+  render(filtered);
+});
+render(faqs);
+```
 
-無輸入時顯示全部。
+---
 
-#5 分類按鈕列左右對齊
+## #5 分類按鈕列 - 對齊與底色
+
 檔案：public/style.css
 
-.category-bar 設 margin:0 20px; display:flex; gap:.6rem; justify-content:space-between;
+```css
+.category-bar{
+  margin:0 20px;
+  display:flex; gap:.6rem;
+  justify-content:space-between;
+}
+.category-btn{
+  padding:.38rem 1.15rem;
+  border:1.6px solid var(--primary);
+  border-radius:9999px;
+  background:var(--faq-bg); color:var(--primary);
+  font-size:.92rem; cursor:pointer; transition:.15s;
+}
+.category-btn.active{
+  background:var(--primary); color:#fff;
+}
+```請幫我調整 .category-btn 的樣式：
+未選中時底色為 #FFF5E1、紅字紅框；
+選中時為 #8A1C1C 白字。
+四顆按鈕整排左右對齊 20px，不可超出畫面寬度。
 
-.category-btn 保持原樣；確認在 390 px 寬度內不換行。
+---
 
-#6 Profile icon 位置修正
-檔案：public/style.css、faq.html
+## #6 FAQ 
+請幫我把 FAQ 問題區塊（Q 開頭那塊）的樣式改成：
+- 背景色：#FFF5E1
+- 邊框：1px 寬、#D9B88A
+- 邊角：6px 圓角
+- 內距：上下左右至少 16px padding
+- 整塊區塊要和畫面左右各有 20px margin
 
-.profile：position:absolute; right:20px; top:10px; width:40px; height:40px;
 
-z-index:90，保證不被 logo 壓住。
+檔案：public/style.css
 
-測試 iPhone 14 模擬器時，與右邊緣距離保持 20 px。
+```css
+.faq-card{
+  background:var(--faq-bg);
+  border:1px solid var(--faq-border);
+  border-radius:6px; padding:1rem;
+  margin:1rem 20px;
+}
+```
 
+（若你的 FAQ 已完成可忽略；保留此任務供後續調整。）
+
+\===================================================
+
+```
+
+> **使用方式**  
+> 1. 覆蓋 `issues.txt` 後 `git add issues.txt && git commit -m "feat: issues v5" && git push`  
+> 2. 在 Codex 直接貼一句：「請完成 issues.txt #1–#6」。或逐項貼 `#1`, `#2`…  
+> 3. 檢查結果；有任何衝突或視覺不符，再截圖回來，我們再迭代。祝順利 🚀
+```

@@ -25,7 +25,7 @@ body{
   position:sticky;
   top:0;
   z-index:120;
-  background:#f7e3cf;
+  background:#F4CDA7;
   height:88px;              /* 上 44px 留白，下 44px 放 logo */
 }
 .safe-gap{height:44px;}                    /* 上半留空（動態島區） */
@@ -67,13 +67,21 @@ body{
   height:auto;
   object-fit:contain;
   pointer-events:none;
+  z-index:100;
 }
 
 /* 標題 */
 .page-title{
-  text-align:center;font-weight:600;font-size:1.05rem;color:#000;
+  background:var(--bg);
+  text-align:center;
+  font-weight:600;
+  font-size:1.05rem;
+  color:#000;
   border-bottom:2.5px solid var(--faq-border);
-  width:fit-content;margin:10px auto 0;padding-bottom:4px;
+  margin:44px 20px 0;
+  width:fit-content;
+  padding-bottom:4px;
+  z-index:10;
 }
 
 /* ───── 分類按鈕列 ───── */
