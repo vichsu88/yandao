@@ -1,140 +1,112 @@
-下面是一組「可直接貼進 issues.txt」的 增量任務 #12-#14。
-Codex 只要依序執行，就能：
-
-讓整個橘色區（漢堡＋logo＋小人）固定在頁面頂端
-
-讓四顆分類按鈕 點擊後變色 + 切換 FAQ
-
-依照你給的 MongoDB 格式，把圖片與超連結渲染在答案裡
+請完成 issues.txt #15-#16
+即可。
 
 txt
 複製
 編輯
 ===================================================
-🔥 FAQ 畫面精修任務清單 v9
+🔥 FAQ 畫面增量任務 v10
 ===================================================
 
-#12 讓橘色 Banner 區固定於頂端
+#15 固定整塊橘色區（漢堡＋Logo＋小人）於頂端
 ---------------------------------------------------
-檔案：public/style.css, public/faq.html
+● HTML（public/faq.html）
+1. 在 `<header class="banner">` 與 `<div class="logo-wrap">` 外層加一個：
+   ```html
+   <div class="banner-fixed">
+     …現有 header…
+     …現有 logo-wrap…
+   </div>
+● CSS（public/style.css）
+2. 追加／覆蓋：
 
-CSS 追加 / 覆蓋
-```css
-/* 🔒 固定整個 banner-wrap */
-.banner-wrap{
-  position:fixed;
-  top:0; left:0; right:0;
-  z-index:1000;
-  background:#F4CDA7;
-  /* 44 安全區 + 60 logo = 104 (給點餘裕) */
-  height:112px;
-}
-
-/* Logo 區微調 */
-.logo-wrap{ height:60px; margin-top:-8px; }
-
-/* 推開主內容，避免被 banner 蓋住 */
-main{ padding-top:120px; }
-HTML（faq.html）
-
-html
+css
 複製
 編輯
-<!-- 把 header + logo 包在同一個 .banner-wrap (你已經有) -->
-<div class="banner-wrap">
-  <header class="banner">
-    …
-  </header>
-  <div class="logo-wrap">
-    …
-  </div>
-</div>
-#13 分類按鈕 active 樣式 + 切換 FAQ
-檔案：public/app.js, public/style.css
+.banner-fixed{
+  position:fixed;
+  top:0; left:0; right:0;
+  background:#F4CDA7;
+  z-index:1000;
+}
+/* header、logo-wrap 原本背景也保留 #F4CDA7 可無接縫 */
 
-CSS 確認
+/* 把主內容推下（44＋60=104，再給 8px 餘裕）*/
+main,
+.category-bar,
+.page-title,
+.faq-search,
+.faq-list{
+  margin-top:112px;
+}
+#16 分類按鈕點擊變色 + 切換 FAQ
+● CSS（public/style.css）
 
 css
 複製
 編輯
 .category-btn{
   background:#FFF5E1; color:#8A1C1C;
-  border:1.5px solid #8A1C1C;
+  border:1.5px solid #8A1C1C; border-radius:9999px;
+  padding:.38rem 1.15rem; font-size:.92rem; cursor:pointer;
 }
 .category-btn.active{
-  background:#8A1C1C; color:#fff;
-  border-color:#8A1C1C;
+  background:#8A1C1C; color:#fff; border-color:#8A1C1C;
 }
-JS 修改
-（在 buildCategoryBar 內部已加 active 切換，這裡補 fetch 部分）
+● JS（public/app.js）
+
+在檔案最上方確認有：
 
 js
 複製
 編輯
-/* ① 定義 API 端點 */
-const BASE = "/api/faq";   // 若你的 Flask 路徑不同請自行替換
-
-/* ② 點擊分類時：取資料 → renderFaq */
-function changeCategory(cat){
-  axios.get(`${BASE}?category=${encodeURIComponent(cat)}`)
-       .then(r => renderFaq(r.data.length ? r.data : DUMMY_FAQ(cat)))
-       .catch(()=>renderFaq(DUMMY_FAQ(cat)));
-}
-#14 渲染 answer 圖片 & 參考連結
-檔案：public/app.js
-
-在 renderFaq 的迴圈 answer 區段前面插入：
+const BASE = "/api/faq"; // 若你的 Flask 路徑不同請修改
+取代或新增以下函式與監聽：
 
 js
 複製
 編輯
-/* 清空原答案區先置入文字 */
-a.textContent = item.answer;
+// 點擊分類按鈕
+document.querySelectorAll('.category-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    // 樣式切換
+    document.querySelectorAll('.category-btn')
+      .forEach(b=>b.classList.toggle('active',b===btn));
 
-/* 如果有 ansphoto (逗號分隔多圖) */
-if(item.ansphoto){
-  item.ansphoto.split(',').forEach(p=>{
-    const img = document.createElement('img');
-    img.src = `FAQphoto/${p.trim()}`;
-    img.style = "max-width:100%;margin-top:.8rem;border-radius:6px";
-    a.appendChild(img);
-  });
-}
+    // 取得分類文字
+    const cat = btn.textContent.trim();
 
-/* 如果有 link 與 link_str */
-if(item.link && item.link_str){
-  item.link.forEach((url,idx)=>{
-    if(!url) return;
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.textContent = item.link_str[idx] || `參考${idx+1}`;
-    anchor.target = "_blank";
-    anchor.style = "color:#8A1C1C;text-decoration:underline;margin-left:.4rem";
-    a.appendChild(anchor);
+    // 叫後端拿 FAQ
+    axios.get(`${BASE}?category=${encodeURIComponent(cat)}`)
+         .then(r=>renderFaq(r.data))
+         .catch(()=>renderFaq([]));
   });
-}
-備註
-• ansphoto 只放檔名即可（如 step1.png），程式會自動補前綴 FAQphoto/
-• link 和 link_str 長度需相同；若 link_str 未給則顯示「參考1、參考2…」
+});
+
+// 首次載入預設第一顆分類
+document.querySelector('.category-btn.active')?.click();
+後端 MongoDB：請確定 /api/faq?category= 能回傳
+
+json
+複製
+編輯
+[
+  {
+    "category":"中承府",
+    "question":"…",
+    "answer":"…",
+    "ansphoto":"step1.png,step2.png",
+    "link":["https://…"],
+    "link_str":["官方網站"]
+  },
+  …
+]
+renderFaq 內已有處理 ansphoto 與超連結邏輯，不需再改。
 
 ===================================================
 
-markdown
 複製
 編輯
 
-### 交給 Codex 的步驟
-
-1. **把上面 #12 ~ #14 貼到 `issues.txt` 底端** → 儲存 → `git add issues.txt && git commit -m "chore: add issues 12-14"` → `git push`
-2. 回 Codex 依序貼：  
-請完成 issues.txt #12-#14
-
-markdown
-複製
-編輯
-3. Merge diff、重新整理瀏覽器。  
-- Banner 應固定在頂端不再滑走  
-- 點「問事 / 收驚 / 手工香」會紅底切換，FAQ 內容跟著變  
-- FAQ 答案若有圖片與連結，會自動帶出
-
-如仍有跑版或 API 端點需調整，再截圖告訴我！
+貼上、交給 Codex　後，整塊橘色 Banner 會固定不動；  
+分類按鈕點擊會紅底白字並且載入對應 FAQ。 若仍有跑版再截圖告訴我！
