@@ -1,91 +1,140 @@
+下面是一組「可直接貼進 issues.txt」的 增量任務 #12-#14。
+Codex 只要依序執行，就能：
+
+讓整個橘色區（漢堡＋logo＋小人）固定在頁面頂端
+
+讓四顆分類按鈕 點擊後變色 + 切換 FAQ
+
+依照你給的 MongoDB 格式，把圖片與超連結渲染在答案裡
+
+txt
+複製
+編輯
 ===================================================
-🔥 FAQ 畫面精修任務清單 v8（固定 Banner 與分類點擊）
+🔥 FAQ 畫面精修任務清單 v9
 ===================================================
 
-#10 固定 banner + logo 區不隨頁面滾動
+#12 讓橘色 Banner 區固定於頂端
 ---------------------------------------------------
 檔案：public/style.css, public/faq.html
 
-🎯 目標：整個 header（含漢堡、人像）+ logo 不可滑動，要始終固定在頁面最上方。
-
-CSS 修改：
+CSS 追加 / 覆蓋
 ```css
-.banner-wrap {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: #F4CDA7;
-  z-index: 1000;
-  height: 132px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 8px;
+/* 🔒 固定整個 banner-wrap */
+.banner-wrap{
+  position:fixed;
+  top:0; left:0; right:0;
+  z-index:1000;
+  background:#F4CDA7;
+  /* 44 安全區 + 60 logo = 104 (給點餘裕) */
+  height:112px;
 }
-.logo-wrap {
-  margin-top: -12px;
-}
-main, .faq-list {
-  padding-top: 144px; /* 推開內容讓出 banner 空間 */
-}
-HTML 結構修改（faq.html）：
+
+/* Logo 區微調 */
+.logo-wrap{ height:60px; margin-top:-8px; }
+
+/* 推開主內容，避免被 banner 蓋住 */
+main{ padding-top:120px; }
+HTML（faq.html）
 
 html
 複製
 編輯
-<!-- 包住 header 和 logo-wrap -->
+<!-- 把 header + logo 包在同一個 .banner-wrap (你已經有) -->
 <div class="banner-wrap">
   <header class="banner">
-    <button id="hamburger" aria-label="選單">
-      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-    </button>
-    <img src="FAQphoto/membericon.png" class="profile" alt="會員" />
+    …
   </header>
   <div class="logo-wrap">
-    <img src="FAQphoto/bannerlogo.png" alt="煙島元帥" class="banner-logo" />
+    …
   </div>
 </div>
-#11 點擊分類按鈕後有樣式變化（active 狀態）
-檔案：public/app.js、style.css
+#13 分類按鈕 active 樣式 + 切換 FAQ
+檔案：public/app.js, public/style.css
 
-JS（點擊時切換 active）：
-
-js
-複製
-編輯
-document.querySelectorAll('.category-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  });
-});
-CSS：
+CSS 確認
 
 css
 複製
 編輯
-.category-btn {
-  background: #FFF5E1;
-  color: #8A1C1C;
-  border: 1.5px solid #8A1C1C;
+.category-btn{
+  background:#FFF5E1; color:#8A1C1C;
+  border:1.5px solid #8A1C1C;
 }
-.category-btn.active {
-  background: #8A1C1C;
-  color: #fff;
-  border-color: #8A1C1C;
+.category-btn.active{
+  background:#8A1C1C; color:#fff;
+  border-color:#8A1C1C;
 }
-備註：無論點哪顆，其他要自動移除 .active，只留當前選中者有樣式。
+JS 修改
+（在 buildCategoryBar 內部已加 active 切換，這裡補 fetch 部分）
+
+js
+複製
+編輯
+/* ① 定義 API 端點 */
+const BASE = "/api/faq";   // 若你的 Flask 路徑不同請自行替換
+
+/* ② 點擊分類時：取資料 → renderFaq */
+function changeCategory(cat){
+  axios.get(`${BASE}?category=${encodeURIComponent(cat)}`)
+       .then(r => renderFaq(r.data.length ? r.data : DUMMY_FAQ(cat)))
+       .catch(()=>renderFaq(DUMMY_FAQ(cat)));
+}
+#14 渲染 answer 圖片 & 參考連結
+檔案：public/app.js
+
+在 renderFaq 的迴圈 answer 區段前面插入：
+
+js
+複製
+編輯
+/* 清空原答案區先置入文字 */
+a.textContent = item.answer;
+
+/* 如果有 ansphoto (逗號分隔多圖) */
+if(item.ansphoto){
+  item.ansphoto.split(',').forEach(p=>{
+    const img = document.createElement('img');
+    img.src = `FAQphoto/${p.trim()}`;
+    img.style = "max-width:100%;margin-top:.8rem;border-radius:6px";
+    a.appendChild(img);
+  });
+}
+
+/* 如果有 link 與 link_str */
+if(item.link && item.link_str){
+  item.link.forEach((url,idx)=>{
+    if(!url) return;
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.textContent = item.link_str[idx] || `參考${idx+1}`;
+    anchor.target = "_blank";
+    anchor.style = "color:#8A1C1C;text-decoration:underline;margin-left:.4rem";
+    a.appendChild(anchor);
+  });
+}
+備註
+• ansphoto 只放檔名即可（如 step1.png），程式會自動補前綴 FAQphoto/
+• link 和 link_str 長度需相同；若 link_str 未給則顯示「參考1、參考2…」
 
 ===================================================
 
-yaml
+markdown
 複製
 編輯
 
----
+### 交給 Codex 的步驟
 
-⚠️ 貼完之後請你輸入：
+1. **把上面 #12 ~ #14 貼到 `issues.txt` 底端** → 儲存 → `git add issues.txt && git commit -m "chore: add issues 12-14"` → `git push`
+2. 回 Codex 依序貼：  
+請完成 issues.txt #12-#14
 
-請完成 issues.txt #10-#11
+markdown
+複製
+編輯
+3. Merge diff、重新整理瀏覽器。  
+- Banner 應固定在頂端不再滑走  
+- 點「問事 / 收驚 / 手工香」會紅底切換，FAQ 內容跟著變  
+- FAQ 答案若有圖片與連結，會自動帶出
 
+如仍有跑版或 API 端點需調整，再截圖告訴我！
