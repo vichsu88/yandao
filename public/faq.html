@@ -4,46 +4,61 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>常見問題｜煙島元帥</title>
+
+  <!-- 样式 -->
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet" />
+
+  <!-- axios（若要串後端可用）-->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
-  <!-- 非手機遮罩 -->
+  <!-- ▉ 非手機橫向遮罩 -->
   <div id="non-mobile">請使用手機直向瀏覽</div>
 
-  <!-- █ Banner 88px：上 44 留空，下 44 放內容 -->
-  <div class="banner">
-    <div class="safe-gap"></div>
+  <!-- ▉ 44px 安全區（給動態島） -->
+  <header class="banner">
+    <!-- 漢堡 -->
+    <button id="hamburger" aria-label="選單">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+    <!-- 會員 -->
+    <img src="FAQphoto/membericon.png" class="profile" alt="會員" />
+  </header>
 
-    <div class="top-bar">
-      <!-- 漢堡 -->
-      <button id="hamburger" aria-label="選單">
-        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-      </button>
-
-      <!-- Logo 合圖 -->
-      <img src="FAQphoto/bannerlogo.png" alt="煙島元帥" class="banner-logo" />
-
-      <!-- 會員 -->
-      <img src="FAQphoto/membericon.png" class="profile" alt="會員" />
-    </div>
-
+  <!-- ▉ Logo 區（米白底）-->
+  <div class="logo-wrap">
+    <img src="FAQphoto/bannerlogo.png" alt="煙島元帥" class="banner-logo" />
   </div>
 
-  <!-- 常見問題標題 -->
+  <!-- ▉ 常見問題標題 -->
   <h2 class="page-title">常見問題</h2>
 
-  <!-- 分類按鈕列 -->
-  <nav id="category-bar" class="category-bar"></nav>
+  <!-- ▉ 分類按鈕 -->
+  <nav id="category-bar" class="category-bar">
+    <button class="category-btn active">中承府</button>
+    <button class="category-btn">問事</button>
+    <button class="category-btn">收驚</button>
+    <button class="category-btn">手工香</button>
+  </nav>
 
-  <!-- FAQ 列表 -->
-  <main id="faq-list" class="faq-list"></main>
+  <!-- ▉ FAQ 列表 -->
+  <main id="faq-list" class="faq-list">
+    <section class="faq-card">
+      <div class="question">
+        <span>Q: 中承府 範例問題？</span>
+        <span class="toggle">＋</span>
+      </div>
+      <div class="answer">
+        中承府 範例答案：<br>- Step 1<br>- Step 2
+      </div>
+    </section>
+  </main>
 
-  <!-- TOP -->
-  <a href="#" id="to-top" class="to-top">▲TOP</a>
+  <!-- ▉ TOP -->
+  <a href="#" class="to-top">▲TOP</a>
 
-  <!-- Footer -->
+  <!-- ▉ Footer -->
   <footer class="footer">
     <address>
       承天中承府<br />
@@ -58,6 +73,14 @@
     </div>
   </footer>
 
-  <script src="app.js"></script>
+  <!-- ▉ FAQ 展開 JS（簡單示範）-->
+  <script>
+    document.querySelectorAll('.faq-card .toggle').forEach(t=>{
+      t.addEventListener('click',()=>{
+        const card=t.closest('.faq-card');
+        card.classList.toggle('open');
+      });
+    });
+  </script>
 </body>
 </html>
