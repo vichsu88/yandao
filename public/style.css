@@ -1,0 +1,90 @@
+:root{
+  --primary:#8A1C1C;
+  --bg:#FDF8F2;
+  --faq-bg:#FFF5E1;
+  --faq-border:#D9B88A;
+  --footer-h:92px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:var(--bg);
+  font-family:'Noto Sans TC',sans-serif;
+  display:flex;flex-direction:column;min-height:100vh;
+}
+
+/* ───── 手機限制遮罩 ───── */
+#non-mobile{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:#fff;font-size:1.25rem;color:var(--primary);z-index:9999;
+}
+@media(max-width:430px){#non-mobile{display:none;}}
+
+/* █ Banner 88px */
+.banner{position:sticky;top:0;z-index:120;background:#f7e3cf;}
+.safe-gap{height:44px;}                    /* 上半留空（動態島區） */
+
+/* 下半 44px 的內容列 */
+.top-bar{
+  height:44px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;position:relative;
+}
+
+/* 漢堡 */
+#hamburger{width:46px;height:36px;border:none;background:none;padding:5px 0;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;}
+#hamburger .bar{height:5px;background:var(--primary);border-radius:2px;}
+
+/* 會員 */
+.profile{width:40px;height:40px;object-fit:contain;}
+
+/* 合成 logo */
+.banner-logo{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  height:44px;max-width:340px;width:auto;object-fit:contain;pointer-events:none;
+}
+
+/* 標題 */
+.page-title{
+  text-align:center;font-weight:600;font-size:1.05rem;color:#000;
+  border-bottom:2.5px solid var(--faq-border);
+  width:fit-content;margin:10px auto 0;padding-bottom:4px;
+}
+
+/* ───── 分類按鈕列 ───── */
+.category-bar{
+  background:var(--bg);padding:.7rem 16px;display:flex;gap:.7rem;justify-content:center;
+}
+.category-btn{
+  padding:.38rem 1.15rem;border:1.6px solid var(--primary);border-radius:9999px;
+  background:#fff;color:var(--primary);font-size:.92rem;cursor:pointer;transition:.15s;
+}
+.category-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+/* ───── FAQ 列表 ───── */
+.faq-list{padding-bottom:2rem;}
+.faq-card{
+  width:80%;margin:1.2rem auto;padding:1rem 1rem 1.2rem;background:var(--faq-bg);
+  border:1.6px solid var(--faq-border);border-radius:8px;position:relative;
+}
+.faq-card:not(:last-child)::after{
+  content:'';position:absolute;left:10%;bottom:-1.2rem;width:80%;height:1.6px;background:var(--faq-border);
+}
+.question{display:flex;justify-content:space-between;font-weight:600;}
+.toggle{font-size:1.5rem;color:var(--primary);cursor:pointer;}
+.answer{margin-top:.8rem;white-space:pre-wrap;display:none;font-size:.9rem;line-height:1.45;}
+.faq-card.open .answer{display:block;}
+.faq-card.open .toggle{transform:rotate(45deg);}
+
+/* ───── TOP 按鈕 ───── */
+.to-top{
+  position:fixed;right:1rem;bottom:calc(var(--footer-h) + 1rem);padding:.6rem 1.15rem;border-radius:9999px;
+  font-size:.82rem;background:var(--primary);color:#fff;text-decoration:none;z-index:200;
+}
+
+/* ───── Footer ───── */
+.footer{
+  margin-top:auto;height:var(--footer-h);background:var(--primary);color:#fff;
+  padding:1rem 16px;display:flex;align-items:center;justify-content:space-between;
+}
+.footer address{font-style:normal;font-size:.78rem;line-height:1.35rem;}
+.icons{display:flex;gap:1.1rem;}
+.icons img{width:34px;height:34px;}
