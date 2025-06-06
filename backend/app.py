@@ -49,4 +49,4 @@ def index():
 if __name__ == '__main__':
     # ▼ Render 會自動給 PORT；本機沒設時預設 5000
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
