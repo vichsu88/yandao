@@ -1,82 +1,98 @@
 /* ====================== FAQ 渲染 & 搜尋 功能 ====================== */
 const faqEl = document.getElementById('faq-list');
-let allFaqs = []; // 用來存放從後端抓到的所有 FAQ 資料
+let allFaqsAll = [];             // 用來存放「所有分類」的 FAQ，供跨分類搜尋
+let currentCategoryFaqs = [];     // 用來存放「目前選定分類」的 FAQ
+const categoryCache = {};         // 快取各分類抓取結果，避免重複 API 請求
 
 /* ===== －－－－－－ 動態載入分類按鈕函式 －－－－－－ ===== */
 const categoryBar = document.getElementById('category-bar');
 
-// 1. 取得分類清單，並且動態產生按鈕、綁定事件
 async function loadCategories() {
   try {
-    // 從後端拿所有分類（array of strings）
+    // 1. 向後端拿所有分類
     const res = await axios.get('/api/faq/categories');
-    const categories = res.data; // 比如 ["中承府","問事","收驚","手工香"]
+    const categories = res.data;  // e.g. ["中承府","問事","收驚","手工香"]
 
-    // 先把原本 <nav> 裡的一切清空
+    // 清空 <nav> 裡的內容
     categoryBar.innerHTML = '';
 
-    // 有取得分類才做事
     if (Array.isArray(categories) && categories.length > 0) {
       categories.forEach((cat, index) => {
-        // 2. 為每個分類建立一個 <button>
         const btn = document.createElement('button');
         btn.className = 'category-btn';
         btn.textContent = cat;
+        btn.setAttribute('aria-pressed', index === 0 ? 'true' : 'false');
 
-        // 第一個分類預設加 .active
+        // 第一個分類預設為 active
         if (index === 0) {
           btn.classList.add('active');
         }
 
-        // 3. 綁定點擊事件：點後端抓該分類的 FAQ、並且切換 active 樣式
+        // 綁定點擊事件：切換標籤並載入該分類的 FAQ
         btn.addEventListener('click', () => {
-          // 切換按鈕樣式：先把所有 .category-btn 都移除 active
-          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.category-btn').forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-pressed', 'false');
+          });
           btn.classList.add('active');
-
-          // 用這個分類名稱去後端請求對應的 FAQ
-          axios
-            .get(`/api/faq?category=${encodeURIComponent(cat)}`)
-            .then(resp => {
-              renderFaq(resp.data);
-              allFaqs = resp.data;
-            })
-            .catch(() => {
-              renderFaq([]);
-              allFaqs = [];
-            });
+          btn.setAttribute('aria-pressed', 'true');
+          loadFaqByCategory(cat);
         });
 
-        // 把按鈕加到 <nav id="category-bar">
         categoryBar.appendChild(btn);
       });
 
-      // 4. 預設畫面：先去抓第一個分類的 FAQ
-      const defaultCat = categories[0];
-      axios
-        .get(`/api/faq?category=${encodeURIComponent(defaultCat)}`)
-        .then(resp => {
-          renderFaq(resp.data);
-          allFaqs = resp.data;
-        })
-        .catch(() => {
-          renderFaq([]);
-          allFaqs = [];
-        });
+      // 4. 預設載入「第一個分類」的 FAQ
+      loadFaqByCategory(categories[0]);
     } else {
-      // 如果根本沒分類，就清空 FAQ
+      // 如果根本沒分類，就顯示空畫面
       renderFaq([]);
+      currentCategoryFaqs = [];
     }
 
+    // 5. 再去拿一次「全部」的 FAQ，存到 allFaqsAll（用於跨分類搜尋）
+    try {
+      const allRes = await axios.get('/api/faq');
+      allFaqsAll = allRes.data;
+    } catch (errAll) {
+      console.error('載入所有 FAQ 失敗', errAll);
+      allFaqsAll = [];
+    }
   } catch (err) {
     console.error('載入分類失敗', err);
     renderFaq([]);
+    currentCategoryFaqs = [];
+    allFaqsAll = [];
   }
 }
 
-/* 產生 FAQ 卡片的函式 */
+// 依據「某個分類名稱」載該分類的 FAQ
+function loadFaqByCategory(categoryName) {
+  // 如果快取裡已經有，就直接用快取
+  if (categoryCache[categoryName]) {
+    currentCategoryFaqs = categoryCache[categoryName];
+    renderFaq(currentCategoryFaqs);
+    return;
+  }
+
+  axios
+    .get(`/api/faq?category=${encodeURIComponent(categoryName)}`)
+    .then(resp => {
+      const faqs = resp.data;
+      categoryCache[categoryName] = faqs;  // 快取
+      currentCategoryFaqs = faqs;
+      renderFaq(faqs);
+    })
+    .catch(err => {
+      console.error(`載入分類 ${categoryName} 的 FAQ 失敗`, err);
+      currentCategoryFaqs = [];
+      renderFaq([]);
+    });
+}
+
+/* ===== －－－－－－ 產生 FAQ 卡片 & 渲染 －－－－－－ ===== */
 function renderFaq(list) {
-  faqEl.innerHTML = ''; // 清空
+  faqEl.innerHTML = ''; // 先清空
 
   if (!Array.isArray(list) || list.length === 0) {
     const empty = document.createElement('div');
@@ -91,79 +107,82 @@ function renderFaq(list) {
     const card = document.createElement('div');
     card.className = 'faq-card';
 
-    // 問題列
-    const q = document.createElement('div');
-    q.className = 'question';
-    q.innerHTML = `<span>Q: ${item.question}</span><span class="toggle">＋</span>`;
-    q.onclick = () => {
-      card.classList.toggle('open');
+    // ─── 問題列（用 textContent 以防 XSS） ───
+    const qWrap = document.createElement('div');
+    qWrap.className = 'question';
+    const qText = document.createElement('span');
+    qText.textContent = `Q: ${item.question}`;
+    const toggle = document.createElement('span');
+    toggle.className = 'toggle';
+    toggle.textContent = '＋';
+    qWrap.append(qText, toggle);
+    qWrap.onclick = () => {
+      const isOpen = card.classList.toggle('open');
+      // 這裡如果要無障礙進階，可加上 aria-expanded:
+      qWrap.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     };
-    card.appendChild(q);
+    qWrap.setAttribute('role', 'button');
+    qWrap.setAttribute('aria-expanded', 'false');
+    card.appendChild(qWrap);
 
-    // 答案列
+    // ─── 答案列 ───
     const a = document.createElement('div');
     a.className = 'answer';
     a.textContent = item.answer || '';
 
-    // 參考連結 (如果有陣列 item.link)
+    // ─── 參考連結 (如果有陣列 item.link，且裡面每個元素都有 text 與 url) ───
     if (Array.isArray(item.link) && item.link.length > 0) {
-      const links = document.createElement('div');
-      links.style.marginTop = '.6rem';
-      item.link.forEach((url, idx) => {
-        if (!url) return;
+      const linksContainer = document.createElement('div');
+      linksContainer.className = 'link-group';
+
+      item.link.forEach(linkObj => {
+        if (!linkObj || !linkObj.url || !linkObj.text) return;
         const l = document.createElement('a');
-        l.href = url;
+        l.href = linkObj.url;
         l.target = '_blank';
         l.rel = 'noopener';
-        l.textContent = Array.isArray(item['link-string'])
-          ? (item['link-string'][idx] || `參考 ${idx + 1}`)
-          : `參考 ${idx + 1}`;
-        l.style.display = 'block';
-        links.appendChild(l);
+        l.textContent = linkObj.text;
+        l.className = 'link-btn';
+        linksContainer.appendChild(l);
       });
-      a.appendChild(links);
+
+      a.appendChild(linksContainer);
     }
 
-    // 圖片 (如果有 ansphoto 字串)
-    if (typeof item.ansphoto === 'string' && item.ansphoto.trim()) {
-      item.ansphoto.split(',').forEach(p => {
-        const src = p.trim();
-        if (!src) return;
-        const img = document.createElement('img');
-        img.src = `FAQphoto/${src}`;
-        img.style = 'max-width:100%; margin-top:.6rem; border-radius:6px;';
-        a.appendChild(img);
-      });
-    }
+    // 圖片部分已移除
 
     card.appendChild(a);
     faqEl.appendChild(card);
   });
 }
 
-
-/* －－－－－－ TOP 平滑滾動 －－－－－－ */
+/* ===== －－－－－－ TOP 平滑滾動 －－－－－－ ===== */
 document.getElementById('to-top').addEventListener('click', e => {
   e.preventDefault();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-/* －－－－－－ 搜尋框 (Client-side 搜尋 on allFaqs) －－－－－－ */
+/* ===== －－－－－－ 搜尋框 (Client-side 跨分類搜尋, 加 Debounce) －－－－－－ ===== */
 const searchInput = document.getElementById("searchInput");
+let debounceTimer = null;
 searchInput.addEventListener("input", e => {
-  const kw = e.target.value.trim();
-  if (!kw) {
-    // 如果搜尋欄為空，就清空 FAQ 列表
-    faqEl.innerHTML = '';
-    return;
-  }
-  // 篩選 allFaqs：只要 question 或 tags 其中一個包含關鍵字，就顯示
-  const filtered = allFaqs.filter(f =>
-    (Array.isArray(f.tags) && f.tags.some(t => t.includes(kw))) ||
-    (f.question && f.question.includes(kw))
-  );
-  renderFaq(filtered);
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    const kw = e.target.value.trim().toLowerCase();
+    if (!kw) {
+      // 如果搜尋欄為空，回復「顯示目前分類的所有問答」
+      renderFaq(currentCategoryFaqs);
+      return;
+    }
+    // 篩選 allFaqsAll：question 或 tags 包含關鍵字
+    const filtered = allFaqsAll.filter(f => {
+      const inQuestion = f.question && f.question.toLowerCase().includes(kw);
+      const inTags = Array.isArray(f.tags) && f.tags.some(t => t.toLowerCase().includes(kw));
+      return inQuestion || inTags;
+    });
+    renderFaq(filtered);
+  }, 300); // 300ms debounce
 });
 
-// －－－－－－ 頁面載入後先取得分類與 FAQ
+// 頁面載入後，先取得分類按鈕與 FAQ
 loadCategories();

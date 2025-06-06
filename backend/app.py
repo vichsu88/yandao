@@ -28,16 +28,15 @@ except Exception as e:
     print("Ping 失敗，錯誤訊息：", e)
 
 # ---------- 指定使用的資料庫與 Collection ----------
-# Atlas 中你的資料庫名稱是 'yandao'，集合名稱是 'FAQ'
-db  = client['yandao']
-col = db['FAQ']
+db  = client['yandao']   # Atlas 上的 Database 名稱
+col = db['FAQ']          # Atlas 上的 Collection 名稱（注意大小寫）
 
 # ===== API =====
 @app.route('/api/faq/categories')
 def categories():
     # 先取出 is_top = True 的分類
     tops = list(col.find({'is_top': True}).distinct('category'))
-    # 再取出所有分類，並移除已在 tops 裡的
+    # 再取出所有分類，並排除已在 tops 裡的
     rest = [c for c in col.distinct('category') if c not in tops]
     return jsonify(tops + rest)
 

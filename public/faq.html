@@ -41,14 +41,14 @@
     <input type="search" id="searchInput" placeholder="搜尋問題" />
   </div>
 
-  <!-- ▉ 分類按鈕列（留空，改由 app.js 來產生按鈕） -->
+  <!-- ▉ 分類按鈕列（留空，由 app.js 動態插入按鈕） -->
   <nav id="category-bar" class="category-bar">
     <!-- JavaScript 會動態插入 <button> -->
   </nav>
 
   <!-- ▉ FAQ 列表（由 JavaScript 動態插入） -->
   <main id="faq-list" class="faq-list">
-    <!-- 初始不放任何卡片，app.js 會直接填入 -->
+    <!-- 初始無內容，app.js 會自行填入 -->
   </main>
 
   <!-- ▉ ▲TOP 按鈕 -->
@@ -69,7 +69,7 @@
     </div>
   </footer>
 
-  <!-- ▉ FAQ 展開 + 搜尋 功能 -->
+  <!-- ▉ Script 位置請放在 body 底部，確保 DOM 元素都已經載入 -->
   <script src="app.js"></script>
 </body>
 </html>

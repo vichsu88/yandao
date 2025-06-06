@@ -20,7 +20,7 @@ body {
   min-height: 100vh;
 }
 
-/* ▉ 非手機橫向遮罩 */
+/* 非手機橫向遮罩 */
 #non-mobile {
   position: fixed;
   inset: 0;
@@ -38,7 +38,7 @@ body {
   }
 }
 
-/* ▉ 整塊橘色 Banner + Logo 固定在最上方（總高度 = 44px + 60px = 104px）*/
+/* 橘色 Banner + Logo 固定在最上方（總高度 = 44px + 60px = 104px） */
 .banner-fixed {
   position: fixed;
   top: 0;
@@ -49,12 +49,12 @@ body {
   z-index: 1000;
 }
 
-/* ▉ 上半 44px：漢堡 + Profile */
+/* 上半 44px：漢堡 + Profile */
 .banner {
   position: relative;
   height: 44px;
   background: #F4CDA7;
-  z-index: 1001;         /* 比 logo-wrap 高一層 */
+  z-index: 1001;
 }
 
 /* 漢堡 Icon：24px，高度底部貼齊 104px → top = 104 - 24 = 80px */
@@ -91,7 +91,7 @@ body {
   z-index: 1001;
 }
 
-/* ▉ 下半 60px：Logo 放置區 */
+/* 下半 60px：Logo 放置區 */
 .logo-wrap {
   position: relative;
   height: 60px;
@@ -110,35 +110,26 @@ body {
   pointer-events: none;
 }
 
-/* ▉ 推開主內容：避免被橘色 Banner 遮住（改為 4px ）*/
-main,
-.category-bar,
-.page-title,
-.faq-search,
-.faq-list {
-  margin-top: 4px;   /* 只往下推 4px，不再使用 104px，留白由單獨設定 */
-}
-
-/* ▉ 常見問題 標題（改成 margin-top:120px） */
+/* 推開主內容：避免被橘色 Banner 遮住（改為 margin-top:120px+12px ） */
 .page-title {
-  position: relative;                 /* 使 z-index 生效 */
+  position: relative;
   text-align: center;
   font-weight: 600;
   font-size: 1.05rem;
   color: #000;
   border-bottom: 2.5px solid var(--faq-border);
-  margin: 120px auto 0;               /* 直接下移 120px */
+  margin: 120px auto 0;     /* 直接下移 120px */
   width: fit-content;
   padding-bottom: 4px;
-  background: var(--bg); /* 讓標題底色保持白色 */
+  background: var(--bg);
   z-index: 500;
 }
 
-/* ▉ 搜尋框 */
+/* 搜尋框 */
 .faq-search {
   margin: 12px auto 0;
   width: 350px;
-  max-width: calc(100% - 40px);    /* 左右各留 20px 空間 */
+  max-width: calc(100% - 40px);
   height: 33px;
 }
 #searchInput {
@@ -156,7 +147,7 @@ main,
   color: #B6B6B6;
 }
 
-/* ▉ 分類按鈕列 */
+/* 分類按鈕列 */
 .category-bar {
   margin: 0 20px;
   padding: 0.7rem 0;
@@ -176,14 +167,19 @@ main,
   cursor: pointer;
   transition: 0.15s;
 }
-.category-btn.active {
-  background: #8A1C1C;
+.category-btn:hover {
+  background: var(--faq-bg);
+}
+.category-btn.active,
+.category-btn[aria-pressed="true"] {
+  background: var(--primary);
   color: #fff;
-  border-color: #8A1C1C;
+  border-color: var(--primary);
 }
 
-/* ▉ FAQ 列表 區 */
+/* FAQ 列表 區 */
 .faq-list {
+  /* 因為 page-title 已經留 120px 再加 margin-bottom 12px，故不用額外 top margin */
   padding-bottom: 2rem;
 }
 .faq-card {
@@ -219,7 +215,25 @@ main,
   transform: rotate(45deg);
 }
 
-/* ▉ ▲TOP 按鈕 */
+/* 連結按鈕共用樣式 */
+.link-btn {
+  display: inline-block;
+  margin-right: 0.8rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  background: var(--faq-bg);
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background 0.15s, color 0.15s;
+}
+.link-btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* TOP 按鈕 */
 .to-top {
   position: fixed;
   right: 1rem;
@@ -233,7 +247,7 @@ main,
   z-index: 200;
 }
 
-/* ▉ Footer */
+/* Footer */
 .footer {
   margin-top: auto;
   height: var(--footer-h);
