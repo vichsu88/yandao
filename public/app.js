@@ -2,6 +2,78 @@
 const faqEl = document.getElementById('faq-list');
 let allFaqs = []; // 用來存放從後端抓到的所有 FAQ 資料
 
+/* ===== －－－－－－ 動態載入分類按鈕函式 －－－－－－ ===== */
+const categoryBar = document.getElementById('category-bar');
+
+// 1. 取得分類清單，並且動態產生按鈕、綁定事件
+async function loadCategories() {
+  try {
+    // 從後端拿所有分類（array of strings）
+    const res = await axios.get('/api/faq/categories');
+    const categories = res.data; // 比如 ["中承府","問事","收驚","手工香"]
+
+    // 先把原本 <nav> 裡的一切清空
+    categoryBar.innerHTML = '';
+
+    // 有取得分類才做事
+    if (Array.isArray(categories) && categories.length > 0) {
+      categories.forEach((cat, index) => {
+        // 2. 為每個分類建立一個 <button>
+        const btn = document.createElement('button');
+        btn.className = 'category-btn';
+        btn.textContent = cat;
+
+        // 第一個分類預設加 .active
+        if (index === 0) {
+          btn.classList.add('active');
+        }
+
+        // 3. 綁定點擊事件：點後端抓該分類的 FAQ、並且切換 active 樣式
+        btn.addEventListener('click', () => {
+          // 切換按鈕樣式：先把所有 .category-btn 都移除 active
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          // 用這個分類名稱去後端請求對應的 FAQ
+          axios
+            .get(`/api/faq?category=${encodeURIComponent(cat)}`)
+            .then(resp => {
+              renderFaq(resp.data);
+              allFaqs = resp.data;
+            })
+            .catch(() => {
+              renderFaq([]);
+              allFaqs = [];
+            });
+        });
+
+        // 把按鈕加到 <nav id="category-bar">
+        categoryBar.appendChild(btn);
+      });
+
+      // 4. 預設畫面：先去抓第一個分類的 FAQ
+      const defaultCat = categories[0];
+      axios
+        .get(`/api/faq?category=${encodeURIComponent(defaultCat)}`)
+        .then(resp => {
+          renderFaq(resp.data);
+          allFaqs = resp.data;
+        })
+        .catch(() => {
+          renderFaq([]);
+          allFaqs = [];
+        });
+    } else {
+      // 如果根本沒分類，就清空 FAQ
+      renderFaq([]);
+    }
+
+  } catch (err) {
+    console.error('載入分類失敗', err);
+    renderFaq([]);
+  }
+}
+
 /* 產生 FAQ 卡片的函式 */
 function renderFaq(list) {
   faqEl.innerHTML = ''; // 清空
@@ -69,44 +141,6 @@ function renderFaq(list) {
   });
 }
 
-/* －－－－－－ 分類按鈕 －－－－－－ */
-document.querySelectorAll('.category-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    // 切換按鈕樣式
-    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    const cat = btn.textContent.trim();
-
-    // 從後端抓該分類的 FAQ
-    axios
-      .get(`/api/faq?category=${encodeURIComponent(cat)}`)
-      .then(r => {
-        renderFaq(r.data);
-      })
-      .catch(() => {
-        renderFaq([]); 
-      });
-  });
-});
-
-// 首次載入，先抓全部 FAQ 存到 allFaqs，再觸發第一個分類按鈕
-function fetchAllFaqsAndInit() {
-  axios
-    .get('/api/faq')
-    .then(r => {
-      allFaqs = r.data;
-      // 如果頁面有第一個 category 按鈕標記為 active，就自動觸發一次點擊
-      document.querySelector('.category-btn.active')?.click();
-    })
-    .catch(() => {
-      allFaqs = [];
-      // 依然觸發 active 按鈕，畫面顯示「找不到相關問題」
-      document.querySelector('.category-btn.active')?.click();
-    });
-}
-
-fetchAllFaqsAndInit();
 
 /* －－－－－－ TOP 平滑滾動 －－－－－－ */
 document.getElementById('to-top').addEventListener('click', e => {
@@ -130,3 +164,6 @@ searchInput.addEventListener("input", e => {
   );
   renderFaq(filtered);
 });
+
+// －－－－－－ 頁面載入後先取得分類與 FAQ
+loadCategories();

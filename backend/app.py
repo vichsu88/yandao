@@ -1,17 +1,13 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 import os
 
 app = Flask(__name__, static_folder='../public', static_url_path='')
 CORS(app)  # 允許跨域
 
-# === MongoDB 連線 ===
-# backend/app.py（取代原先 “MongoClient(MONGO_URI)” 的部分）
-import os
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-
-# ---------- 連線設定（直接把 Atlas 帳號/密碼寫在這裡） ----------
+# === MongoDB 連線設定 ===
 mongo_user = "yuanshuai260"
 mongo_pwd  = "yandaoyuanshuai"
 mongo_host = "yandaocluster.k1dgdxx.mongodb.net"
@@ -32,13 +28,16 @@ except Exception as e:
     print("Ping 失敗，錯誤訊息：", e)
 
 # ---------- 指定使用的資料庫與 Collection ----------
-db  = client['temple_db']
-col = db['faq']
+# Atlas 中你的資料庫名稱是 'yandao'，集合名稱是 'FAQ'
+db  = client['yandao']
+col = db['FAQ']
 
 # ===== API =====
 @app.route('/api/faq/categories')
 def categories():
-    tops = list(col.find({'is_top':True}).distinct('category'))
+    # 先取出 is_top = True 的分類
+    tops = list(col.find({'is_top': True}).distinct('category'))
+    # 再取出所有分類，並移除已在 tops 裡的
     rest = [c for c in col.distinct('category') if c not in tops]
     return jsonify(tops + rest)
 
@@ -46,10 +45,10 @@ def categories():
 def faq():
     cat = request.args.get('category')
     q = {'category': cat} if cat else {}
-    docs = list(col.find(q, {'_id':0}))   # 去掉 _id
+    docs = list(col.find(q, {'_id': 0}))   # 去掉 _id 欄位
     return jsonify(docs)
 
-# ===== 前端靜態檔 (方便開發) =====
+# ===== 前端靜態檔（方便開發） =====
 @app.route('/')
 def index():
     return send_from_directory(app.static_folder, 'faq.html')
