@@ -9,9 +9,11 @@ app = Flask(__name__, static_folder='../public', static_url_path='')
 CORS(app)
 
 # === MongoDB 連線設定 ===
-mongo_user = "yuanshuai260"
-mongo_pwd  = "yandaoyuanshuai"
-mongo_host = "yandaocluster.k1dgdxx.mongodb.net"
+# 先從環境變數讀取，若找不到對應的環境變數就 fallback 回原本的硬寫值
+mongo_user = os.environ.get("MONGO_USER", "yuanshuai260")
+mongo_pwd  = os.environ.get("MONGO_PWD", "yandaoyuanshuai")
+mongo_host = os.environ.get("MONGO_HOST", "yandaocluster.k1dgdxx.mongodb.net")
+
 uri = (
     f"mongodb+srv://{mongo_user}:{mongo_pwd}@"
     f"{mongo_host}/"
