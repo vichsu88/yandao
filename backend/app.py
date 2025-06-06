@@ -1,16 +1,39 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from pymongo import MongoClient
 import os
 
 app = Flask(__name__, static_folder='../public', static_url_path='')
 CORS(app)  # 允許跨域
 
 # === MongoDB 連線 ===
-MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
-client = MongoClient(MONGO_URI)
+# backend/app.py（取代原先 “MongoClient(MONGO_URI)” 的部分）
+import os
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+
+# ---------- 連線設定（直接把 Atlas 帳號/密碼寫在這裡） ----------
+mongo_user = "yuanshuai260"
+mongo_pwd  = "yandaoyuanshuai"
+mongo_host = "yandaocluster.k1dgdxx.mongodb.net"
+
+uri = (
+    f"mongodb+srv://{mongo_user}:{mongo_pwd}@"
+    f"{mongo_host}/"
+    f"?retryWrites=true&w=majority&appName=yandaoCluster"
+)
+
+client = MongoClient(uri, server_api=ServerApi('1'))
+
+# ---------- Ping 測試，確認連線是否成功 ----------
+try:
+    client.admin.command('ping')
+    print("Pinged your Atlas cluster. 連線成功！")
+except Exception as e:
+    print("Ping 失敗，錯誤訊息：", e)
+
+# ---------- 指定使用的資料庫與 Collection ----------
 db  = client['temple_db']
-col = db['faq']             # Collection 名稱：faq
+col = db['faq']
 
 # ===== API =====
 @app.route('/api/faq/categories')
