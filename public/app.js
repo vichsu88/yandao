@@ -1,5 +1,6 @@
 /* ====================== FAQ 渲染 & 搜尋 功能 ====================== */
 const faqEl = document.getElementById('faq-list');
+let allFaqs = []; // 用來存放從後端抓到的所有 FAQ 資料
 
 /* 產生 FAQ 卡片的函式 */
 function renderFaq(list) {
@@ -77,28 +78,35 @@ document.querySelectorAll('.category-btn').forEach(btn => {
 
     const cat = btn.textContent.trim();
 
-    // 真正串後端時，請把下面這段註解打開，並移除 demo 部分
-    /*
+    // 從後端抓該分類的 FAQ
     axios
       .get(`/api/faq?category=${encodeURIComponent(cat)}`)
-      .then(r => renderFaq(r.data))
-      .catch(() => renderFaq([]));
-    */
-
-    // Demo：使用假資料，顯示「【分類】範例問題」
-    const fake = [{
-      question: `【${cat}】範例問題？`,
-      answer: `${cat} 範例答案：\n- Step 1\n- Step 2`,
-      link: [],
-      'link-string': [],
-      ansphoto: ''
-    }];
-    renderFaq(fake);
+      .then(r => {
+        renderFaq(r.data);
+      })
+      .catch(() => {
+        renderFaq([]); 
+      });
   });
 });
 
-// 首次載入，強制觸發第一顆 active（中承府）
-document.querySelector('.category-btn.active')?.click();
+// 首次載入，先抓全部 FAQ 存到 allFaqs，再觸發第一個分類按鈕
+function fetchAllFaqsAndInit() {
+  axios
+    .get('/api/faq')
+    .then(r => {
+      allFaqs = r.data;
+      // 如果頁面有第一個 category 按鈕標記為 active，就自動觸發一次點擊
+      document.querySelector('.category-btn.active')?.click();
+    })
+    .catch(() => {
+      allFaqs = [];
+      // 依然觸發 active 按鈕，畫面顯示「找不到相關問題」
+      document.querySelector('.category-btn.active')?.click();
+    });
+}
+
+fetchAllFaqsAndInit();
 
 /* －－－－－－ TOP 平滑滾動 －－－－－－ */
 document.getElementById('to-top').addEventListener('click', e => {
@@ -106,42 +114,19 @@ document.getElementById('to-top').addEventListener('click', e => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-/* －－－－－－ 搜尋框 (Client-side Demo 搜尋) －－－－－－ */
-const demoFaqs = [
-  { q: "請問收驚要準備什麼？", a: "示範：記得穿衣服穿衣服穿衣服...", tags: ["收驚", "準備", "供品"] },
-  { q: "手工香可以宅配嗎？", a: "示範回答：可以透過宅配到府。", tags: ["手工香", "宅配"] },
-  { q: "問事服務內容有哪些？", a: "示範：問事可幫你解決各種疑難雜症。", tags: ["問事", "服務"] }
-];
-const listEl = document.getElementById("faq-list");
-
-function renderSearch(data) {
-  listEl.innerHTML = '';
-  data.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'faq-card';
-    const q = document.createElement('div');
-    q.className = 'question';
-    q.innerHTML = `<span>Q: ${item.q}</span><span class="toggle">＋</span>`;
-    q.onclick = () => card.classList.toggle('open');
-    const a = document.createElement('div');
-    a.className = 'answer';
-    a.textContent = item.a;
-    card.appendChild(q);
-    card.appendChild(a);
-    listEl.appendChild(card);
-  });
-}
-
-document.getElementById("searchInput").addEventListener("input", e => {
+/* －－－－－－ 搜尋框 (Client-side 搜尋 on allFaqs) －－－－－－ */
+const searchInput = document.getElementById("searchInput");
+searchInput.addEventListener("input", e => {
   const kw = e.target.value.trim();
   if (!kw) {
-    renderSearch(demoFaqs);
+    // 如果搜尋欄為空，就清空 FAQ 列表
+    faqEl.innerHTML = '';
     return;
   }
-  const filtered = demoFaqs.filter(f =>
-    f.tags.some(t => t.includes(kw)) || f.q.includes(kw)
+  // 篩選 allFaqs：只要 question 或 tags 其中一個包含關鍵字，就顯示
+  const filtered = allFaqs.filter(f =>
+    (Array.isArray(f.tags) && f.tags.some(t => t.includes(kw))) ||
+    (f.question && f.question.includes(kw))
   );
-  renderSearch(filtered);
+  renderFaq(filtered);
 });
-// 首次載入顯示所有 Demo
-renderSearch(demoFaqs);
